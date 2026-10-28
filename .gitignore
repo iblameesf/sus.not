@@ -1,0 +1,28 @@
+# Python environment
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+credentials.json
+token.json
+secrets/
+
+# Local databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Private datasets
+data/private/
+data/raw/
+
+# Node.js
+node_modules/
+
+# macOS
+.DS_Store
