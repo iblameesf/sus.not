@@ -1,0 +1,65 @@
+:root {
+  font-family: system-ui, sans-serif;
+  color: #172033;
+  background: #f6f8fc;
+}
+
+body {
+  width: 360px;
+  margin: 0;
+}
+
+main {
+  padding: 18px;
+}
+
+h1 {
+  margin: 0 0 16px;
+  font-size: 24px;
+}
+
+h2, dt {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+p, li, dd {
+  font-size: 14px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+#current-url {
+  padding: 10px;
+  background: #e8edf5;
+  border-radius: 6px;
+}
+
+button {
+  width: 100%;
+  padding: 10px;
+  border: 0;
+  border-radius: 6px;
+  background: #254bb5;
+  color: white;
+  font: inherit;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+button:focus-visible {
+  outline: 3px solid #172033;
+  outline-offset: 3px;
+}
+
+dd {
+  margin: 4px 0 12px;
+}
+
+ul {
+  padding-left: 20px;
+}

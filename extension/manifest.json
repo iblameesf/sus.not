@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "SUS.NOT",
+  "version": "0.1.0",
+  "description": "Analyze the current tab URL using the local SUS.NOT backend.",
+  "permissions": ["activeTab", "storage", "scripting"],
+  "optional_host_permissions": ["http://*/*", "https://*/*"],
+  "background": {
+    "service_worker": "guardian.js"
+  },
+  "host_permissions": ["http://127.0.0.1:8000/*"],
+  "action": {
+    "default_title": "SUS.NOT",
+    "default_popup": "popup.html"
+  },
+  "content_security_policy": {
+    "extension_pages": "default-src 'self'; script-src 'self'; object-src 'none'; connect-src http://127.0.0.1:8000"
+  }
+}
