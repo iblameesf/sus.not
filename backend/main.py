@@ -5,7 +5,10 @@ from urllib.parse import urlsplit
 from fastapi import FastAPI
 from pydantic import BaseModel, Field, HttpUrl, field_validator
 
+from backend.text_investigator import router as text_investigator_router
+
 app = FastAPI(title="SUS.NOT API")
+app.include_router(text_investigator_router)
 
 
 class AnalyzeURLRequest(BaseModel):
