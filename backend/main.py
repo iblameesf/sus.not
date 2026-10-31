@@ -1,14 +1,39 @@
+from contextlib import asynccontextmanager
 from ipaddress import ip_address
 from typing import Literal
 from urllib.parse import urlsplit
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Header
 from pydantic import BaseModel, Field, HttpUrl, field_validator
 
+from backend.decision_policy import URLDecision, evaluate_url_result
 from backend.text_investigator import router as text_investigator_router
+from backend.history import record_history, redact_url, router as history_router
+from backend.orchestration import router as orchestration_router
+from backend.email_guardian import router as email_guardian_router
+from backend.gmail_security import GmailControl, GmailControlMiddleware, router as gmail_security_router
+from backend.gmail_routes import router as gmail_routes
 
-app = FastAPI(title="SUS.NOT API")
+@asynccontextmanager
+async def lifespan(application):
+    try:
+        yield
+    finally:
+        configured = getattr(application.state, "gmail_service", None)
+        if configured:
+            configured.close()
+
+
+app = FastAPI(title="SUS.NOT API", lifespan=lifespan)
+app.state.gmail_service = None  # Trusted DesktopClient configuration only; no public bootstrap.
+app.state.gmail_control = GmailControl()
+app.add_middleware(GmailControlMiddleware, control=app.state.gmail_control)
 app.include_router(text_investigator_router)
+app.include_router(history_router)
+app.include_router(orchestration_router)
+app.include_router(email_guardian_router)
+app.include_router(gmail_security_router)
+app.include_router(gmail_routes)
 
 
 class AnalyzeURLRequest(BaseModel):
@@ -41,7 +66,6 @@ class AnalyzeURLResponse(BaseModel):
     message: str
 
 
-@app.post("/analyze-url", response_model=AnalyzeURLResponse)
 def analyze_url(request: AnalyzeURLRequest) -> AnalyzeURLResponse:
     # urlsplit only parses text; it makes no network requests.
     parsed = urlsplit(request.url)
@@ -84,6 +108,36 @@ def analyze_url(request: AnalyzeURLRequest) -> AnalyzeURLResponse:
             "A low score does not guarantee safety. The URL was not visited."
         ),
     )
+
+
+@app.post("/analyze-url", response_model=AnalyzeURLResponse)
+def investigate_url(
+    request: AnalyzeURLRequest,
+    x_susnot_record_history: str | None = Header(default=None),
+) -> AnalyzeURLResponse:
+    result = analyze_url(request)
+    record_history(
+        x_susnot_record_history, investigation_type="URL",
+        redacted_url=redact_url(request.url), sus_score=result.sus_score,
+        risk_level=result.risk_level, indicators=result.indicators,
+    )
+    return result
+
+
+@app.post("/evaluate-url", response_model=URLDecision)
+def evaluate_url(
+    request: AnalyzeURLRequest,
+    x_susnot_record_history: str | None = Header(default=None),
+) -> URLDecision:
+    result = analyze_url(request)
+    decision = evaluate_url_result(result)
+    record_history(
+        x_susnot_record_history, investigation_type="URL",
+        redacted_url=redact_url(request.url), sus_score=decision.sus_score,
+        risk_level=decision.risk_level, indicators=result.indicators,
+        recommended_action=decision.recommended_action, policy_version=decision.policy_version,
+    )
+    return decision
 
 
 @app.get("/health")

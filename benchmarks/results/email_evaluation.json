@@ -1,0 +1,253 @@
+{
+  "ai_status": "not_run; no fabricated Qwen findings or end-to-end AI accuracy",
+  "benign_flagged_for_review_or_warning": [
+    "fp-legitimate-newsletter-redirect",
+    "fp-legitimate-lab-ip"
+  ],
+  "cases": [
+    {
+      "actual_advisory": "continue_with_caution",
+      "category": "baseline",
+      "correlation_rules": [],
+      "errors": [],
+      "evidence_types": [],
+      "expected_advisory": "continue_with_caution",
+      "id": "benign-meeting",
+      "label": "benign",
+      "policy_regression_pass": true,
+      "rationale": "Synthetic routine scheduling message with no indicators in implemented checks.",
+      "url_assessments": []
+    },
+    {
+      "actual_advisory": "continue_with_caution",
+      "category": "baseline",
+      "correlation_rules": [],
+      "errors": [],
+      "evidence_types": [],
+      "expected_advisory": "continue_with_caution",
+      "id": "benign-same-reply-domain",
+      "label": "benign",
+      "policy_regression_pass": true,
+      "rationale": "Different local parts within the same domain are not a domain discrepancy.",
+      "url_assessments": []
+    },
+    {
+      "actual_advisory": "continue_with_caution",
+      "category": "baseline",
+      "correlation_rules": [],
+      "errors": [],
+      "evidence_types": [],
+      "expected_advisory": "continue_with_caution",
+      "id": "benign-matching-link",
+      "label": "benign",
+      "policy_regression_pass": true,
+      "rationale": "Visible and actual full hostnames match; linked content is not verified.",
+      "url_assessments": [
+        {
+          "indicators": [],
+          "sus_score": 0,
+          "url_id": "url-1"
+        }
+      ]
+    },
+    {
+      "actual_advisory": "show_warning",
+      "category": "baseline",
+      "correlation_rules": [],
+      "errors": [],
+      "evidence_types": [
+        "url_userinfo",
+        "url_indicator",
+        "url_indicator",
+        "url_indicator",
+        "url_high_risk"
+      ],
+      "expected_advisory": "show_warning",
+      "id": "suspicious-ip-userinfo",
+      "label": "suspicious",
+      "policy_regression_pass": true,
+      "rationale": "Synthetic pressure message with URL features scoring 70 under unchanged URL rules.",
+      "url_assessments": [
+        {
+          "indicators": [
+            "IP address used instead of a domain (+30)",
+            "@ character in URL authority (+25)",
+            "Path contains verify or urgent (+15)"
+          ],
+          "sus_score": 70,
+          "url_id": "url-1"
+        }
+      ]
+    },
+    {
+      "actual_advisory": "show_warning",
+      "category": "baseline",
+      "correlation_rules": [
+        "sender_and_link_mismatch"
+      ],
+      "errors": [],
+      "evidence_types": [
+        "reply_domain_mismatch",
+        "link_destination_mismatch"
+      ],
+      "expected_advisory": "show_warning",
+      "id": "suspicious-sender-and-link",
+      "label": "suspicious",
+      "policy_regression_pass": true,
+      "rationale": "Different reply domain and misleading link label co-occur; still not proof of spoofing.",
+      "url_assessments": [
+        {
+          "indicators": [],
+          "sus_score": 0,
+          "url_id": "url-1"
+        },
+        {
+          "indicators": [],
+          "sus_score": 0,
+          "url_id": "url-2"
+        }
+      ]
+    },
+    {
+      "actual_advisory": "review_before_proceeding",
+      "category": "baseline",
+      "correlation_rules": [],
+      "errors": [],
+      "evidence_types": [
+        "display_address_mismatch"
+      ],
+      "expected_advisory": "review_before_proceeding",
+      "id": "suspicious-display-address",
+      "label": "suspicious",
+      "policy_regression_pass": true,
+      "rationale": "An explicit address in the display name disagrees with the sender domain; no brand guessing.",
+      "url_assessments": []
+    },
+    {
+      "actual_advisory": "review_before_proceeding",
+      "category": "baseline",
+      "correlation_rules": [],
+      "errors": [],
+      "evidence_types": [
+        "reply_domain_mismatch"
+      ],
+      "expected_advisory": "review_before_proceeding",
+      "id": "ambiguous-reply-service",
+      "label": "ambiguous",
+      "policy_regression_pass": true,
+      "rationale": "A third-party support reply domain may be legitimate; ownership was not verified.",
+      "url_assessments": []
+    },
+    {
+      "actual_advisory": "review_before_proceeding",
+      "category": "baseline",
+      "correlation_rules": [],
+      "errors": [],
+      "evidence_types": [
+        "missing_sender"
+      ],
+      "expected_advisory": "review_before_proceeding",
+      "id": "ambiguous-pasted-text",
+      "label": "ambiguous",
+      "policy_regression_pass": true,
+      "rationale": "Pasted plain text lacks sender metadata; this absence limits attribution, not proof of fraud.",
+      "url_assessments": []
+    },
+    {
+      "actual_advisory": "show_warning",
+      "category": "false_positive_candidate",
+      "correlation_rules": [
+        "sender_and_link_mismatch"
+      ],
+      "errors": [],
+      "evidence_types": [
+        "reply_domain_mismatch",
+        "link_destination_mismatch"
+      ],
+      "expected_advisory": "show_warning",
+      "id": "fp-legitimate-newsletter-redirect",
+      "label": "benign",
+      "policy_regression_pass": true,
+      "rationale": "Scenario stipulates a legitimate mailing vendor with different reply domain and tracking redirect; both discrepancy rules fire.",
+      "url_assessments": [
+        {
+          "indicators": [],
+          "sus_score": 0,
+          "url_id": "url-1"
+        },
+        {
+          "indicators": [],
+          "sus_score": 0,
+          "url_id": "url-2"
+        }
+      ]
+    },
+    {
+      "actual_advisory": "review_before_proceeding",
+      "category": "false_positive_candidate",
+      "correlation_rules": [],
+      "errors": [],
+      "evidence_types": [
+        "url_indicator"
+      ],
+      "expected_advisory": "review_before_proceeding",
+      "id": "fp-legitimate-lab-ip",
+      "label": "benign",
+      "policy_regression_pass": true,
+      "rationale": "Scenario stipulates a legitimate lab server using a documentation IP address; the unchanged IP heuristic still adds 30.",
+      "url_assessments": [
+        {
+          "indicators": [
+            "IP address used instead of a domain (+30)"
+          ],
+          "sus_score": 30,
+          "url_id": "url-1"
+        }
+      ]
+    },
+    {
+      "actual_advisory": "continue_with_caution",
+      "category": "false_negative_candidate",
+      "correlation_rules": [],
+      "errors": [],
+      "evidence_types": [],
+      "expected_advisory": "continue_with_caution",
+      "id": "fn-text-only-payment",
+      "label": "suspicious",
+      "policy_regression_pass": true,
+      "rationale": "Advance-fee request has no lexical URL or metadata discrepancy; this offline deterministic slice omits AI and misses its content.",
+      "url_assessments": []
+    },
+    {
+      "actual_advisory": "continue_with_caution",
+      "category": "false_negative_candidate",
+      "correlation_rules": [],
+      "errors": [],
+      "evidence_types": [],
+      "expected_advisory": "continue_with_caution",
+      "id": "fn-clean-looking-destination",
+      "label": "suspicious",
+      "policy_regression_pass": true,
+      "rationale": "Scenario stipulates a deceptive destination without existing URL features. Reputation and page content are not checked.",
+      "url_assessments": [
+        {
+          "indicators": [],
+          "sus_score": 0,
+          "url_id": "url-1"
+        }
+      ]
+    }
+  ],
+  "dataset_sha256": "493de22f0032c08f5e11b13332f1fa9cf2726506d94e8680ba4ee4997cbb798b",
+  "dataset_size": 12,
+  "evaluation_version": "email-1",
+  "label_caveat": "Synthetic scenario labels, not verified fraud or real-world accuracy. Expected advisories are regression targets, not ground truth safety.",
+  "mcp_status": "not_run; actual SDK transport is covered by integration tests",
+  "policy_regressions_passed": 12,
+  "policy_version": "email-1",
+  "scope": "Offline parser, metadata, existing URL analyzer, evidence correlation and email advisory policy only.",
+  "suspicious_without_deterministic_indicators": [
+    "fn-text-only-payment",
+    "fn-clean-looking-destination"
+  ]
+}

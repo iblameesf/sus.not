@@ -1,0 +1,74 @@
+[
+  {
+    "id": "benign-meeting", "label": "benign", "category": "baseline",
+    "rationale": "Synthetic routine scheduling message with no indicators in implemented checks.",
+    "input": {"email": {"sender": "Alice <alice@example.com>", "subject": "Meeting", "text_body": "Our meeting is at noon tomorrow."}},
+    "expected_advisory": "continue_with_caution"
+  },
+  {
+    "id": "benign-same-reply-domain", "label": "benign", "category": "baseline",
+    "rationale": "Different local parts within the same domain are not a domain discrepancy.",
+    "input": {"email": {"sender": "updates@example.com", "reply_to": "support@example.com", "text_body": "Your newsletter subscription is active."}},
+    "expected_advisory": "continue_with_caution"
+  },
+  {
+    "id": "benign-matching-link", "label": "benign", "category": "baseline",
+    "rationale": "Visible and actual full hostnames match; linked content is not verified.",
+    "input": {"email": {"sender": "docs@example.com", "html_body": "<p>Documentation:</p><a href='https://docs.example/guide'>https://docs.example/guide</a>"}},
+    "expected_advisory": "continue_with_caution"
+  },
+  {
+    "id": "suspicious-ip-userinfo", "label": "suspicious", "category": "baseline",
+    "rationale": "Synthetic pressure message with URL features scoring 70 under unchanged URL rules.",
+    "input": {"email": {"sender": "accounts@example.net", "text_body": "Pay immediately to avoid closure: https://accounts@192.0.2.1/verify"}},
+    "expected_advisory": "show_warning"
+  },
+  {
+    "id": "suspicious-sender-and-link", "label": "suspicious", "category": "baseline",
+    "rationale": "Different reply domain and misleading link label co-occur; still not proof of spoofing.",
+    "input": {"email": {"sender": "billing@example.com", "reply_to": "pay@other.example", "html_body": "<a href='https://destination.example/'>https://billing.example/</a>"}},
+    "expected_advisory": "show_warning"
+  },
+  {
+    "id": "suspicious-display-address", "label": "suspicious", "category": "baseline",
+    "rationale": "An explicit address in the display name disagrees with the sender domain; no brand guessing.",
+    "input": {"email": {"sender": "\"support@bank.example\" <person@other.example>", "text_body": "Please send your account details."}},
+    "expected_advisory": "review_before_proceeding"
+  },
+  {
+    "id": "ambiguous-reply-service", "label": "ambiguous", "category": "baseline",
+    "rationale": "A third-party support reply domain may be legitimate; ownership was not verified.",
+    "input": {"email": {"sender": "store@example.com", "reply_to": "ticket@helpdesk.example", "text_body": "Thank you for contacting support."}},
+    "expected_advisory": "review_before_proceeding"
+  },
+  {
+    "id": "ambiguous-pasted-text", "label": "ambiguous", "category": "baseline",
+    "rationale": "Pasted plain text lacks sender metadata; this absence limits attribution, not proof of fraud.",
+    "input": {"raw_email": "Could you confirm the delivery date?"},
+    "expected_advisory": "review_before_proceeding"
+  },
+  {
+    "id": "fp-legitimate-newsletter-redirect", "label": "benign", "category": "false_positive_candidate",
+    "rationale": "Scenario stipulates a legitimate mailing vendor with different reply domain and tracking redirect; both discrepancy rules fire.",
+    "input": {"email": {"sender": "news@publisher.example", "reply_to": "reply@mailer.example", "html_body": "<a href='https://tracking.example/click'>https://publisher.example/</a>"}},
+    "expected_advisory": "show_warning"
+  },
+  {
+    "id": "fp-legitimate-lab-ip", "label": "benign", "category": "false_positive_candidate",
+    "rationale": "Scenario stipulates a legitimate lab server using a documentation IP address; the unchanged IP heuristic still adds 30.",
+    "input": {"email": {"sender": "lab@example.com", "text_body": "Lab instructions: http://192.0.2.10/manual"}},
+    "expected_advisory": "review_before_proceeding"
+  },
+  {
+    "id": "fn-text-only-payment", "label": "suspicious", "category": "false_negative_candidate",
+    "rationale": "Advance-fee request has no lexical URL or metadata discrepancy; this offline deterministic slice omits AI and misses its content.",
+    "input": {"email": {"sender": "prize@example.com", "text_body": "Send an advance processing payment to receive your guaranteed prize. Do not tell anyone."}},
+    "expected_advisory": "continue_with_caution"
+  },
+  {
+    "id": "fn-clean-looking-destination", "label": "suspicious", "category": "false_negative_candidate",
+    "rationale": "Scenario stipulates a deceptive destination without existing URL features. Reputation and page content are not checked.",
+    "input": {"email": {"sender": "notice@example.com", "text_body": "Sign in at https://portal.example/login to keep your account."}},
+    "expected_advisory": "continue_with_caution"
+  }
+]

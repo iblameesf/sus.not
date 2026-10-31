@@ -6,7 +6,9 @@ from collections.abc import AsyncIterator
 from typing import Annotated
 
 import httpx
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, Header, HTTPException
+
+from backend.history import record_history
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints, ValidationError, field_validator
 
 OLLAMA_BASE_URL = "http://127.0.0.1:11434"
@@ -84,7 +86,6 @@ async def get_ollama_client() -> AsyncIterator[httpx.AsyncClient]:
 router = APIRouter()
 
 
-@router.post("/analyze-text", response_model=AnalyzeTextResponse)
 async def analyze_text(
     request: AnalyzeTextRequest,
     client: Annotated[httpx.AsyncClient, Depends(get_ollama_client)],
@@ -145,3 +146,23 @@ async def analyze_text(
     available = 1000 - len(ASSESSMENT_LIMITATION) - 2
     uncertainty = f"{assessment.uncertainty[:available]}\n\n{ASSESSMENT_LIMITATION}"
     return AnalyzeTextResponse.model_validate({**assessment.model_dump(), "uncertainty": uncertainty})
+
+
+@router.post("/analyze-text", response_model=AnalyzeTextResponse)
+async def investigate_text(
+    request: AnalyzeTextRequest,
+    client: Annotated[httpx.AsyncClient, Depends(get_ollama_client)],
+    x_susnot_record_history: str | None = Header(default=None),
+) -> AnalyzeTextResponse:
+    try:
+        result = await analyze_text(request, client)
+    except HTTPException:
+        record_history(x_susnot_record_history, investigation_type="text", analysis_status="failed")
+        raise
+    # Model prose may quote input or secrets. Persist only a fixed presence marker,
+    # never findings, explanations, recommendations, uncertainty, or submitted text.
+    record_history(
+        x_susnot_record_history, investigation_type="text",
+        indicators=["model_reported_indicators"] if result.indicators else [],
+    )
+    return result
