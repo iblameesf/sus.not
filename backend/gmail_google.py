@@ -21,13 +21,20 @@ class GmailError(RuntimeError):
 
 def token_response(data, *, now, previous=None):
     """Google, not email/model content, supplies these protocol fields."""
+    from backend.gmail_tokens import PERMITTED_SCOPES, GMAIL_READONLY_SCOPE
     if not isinstance(data, dict) or not isinstance(data.get("token_type"), str) or data["token_type"].lower() != "bearer":
         raise GmailError("invalid_token_response")
     expires = data.get("expires_in")
     if type(expires) is not int or not 0 < expires <= 86400:
         raise GmailError("invalid_token_response")
-    scope = data.get("scope", GMAIL_READONLY_SCOPE if previous else None)
-    if scope != GMAIL_READONLY_SCOPE:
+    # On refresh Google may omit the scope field; treat omission as "same as before".
+    scope = data.get("scope")
+    if scope is None and previous is not None:
+        scope = " ".join(previous.scopes)
+    if not isinstance(scope, str):
+        raise GmailError("invalid_scope")
+    scopes = tuple(scope.split())
+    if not scopes or len(set(scopes)) != len(scopes) or not set(scopes) <= PERMITTED_SCOPES:
         raise GmailError("invalid_scope")
     access, refresh = data.get("access_token"), data.get("refresh_token")
     for value in (access, refresh):
@@ -38,7 +45,8 @@ def token_response(data, *, now, previous=None):
         raise GmailError("invalid_token_response")
     return OAuthCredentials(access_token=access,
                             refresh_token=refresh or (previous.refresh_token if previous else None),
-                            expires_at=float(now + expires))
+                            expires_at=float(now + expires),
+                            scopes=scopes)
 
 
 def _skeleton_fields(depth=0):
@@ -88,14 +96,24 @@ class GoogleAPI:
         # Injection is for trusted tests, never request fields or model output.
         self._transport = transport
 
-    async def _request(self, method, url, *, access=None, params=None, data=None, cap=24576):
+    async def _request(self, method, url, *, access=None, params=None, data=None, json_body=None, cap=24576):
         allowed = {GOOGLE_TOKEN_ENDPOINT: "POST", GOOGLE_REVOCATION_ENDPOINT: "POST",
                    gmail_endpoint("profile"): "GET", gmail_endpoint("list"): "GET"}
         if url not in allowed:
             prefix = gmail_endpoint("list") + "/"
-            if not url.startswith(prefix) or not valid_message_id(url[len(prefix):]):
+            if not url.startswith(prefix):
                 raise GmailError("invalid_destination")
-            allowed[url] = "GET"
+            suffix = url[len(prefix):]
+            # suffix is either a raw message ID (GET) or <id>/modify (POST)
+            if valid_message_id(suffix):
+                allowed[url] = "GET"
+            elif suffix.endswith("/modify"):
+                candidate_id = suffix[:-len("/modify")]
+                if not valid_message_id(candidate_id):
+                    raise GmailError("invalid_destination")
+                allowed[url] = "POST"
+            else:
+                raise GmailError("invalid_destination")
         if allowed[url] != method:
             raise GmailError("invalid_destination")
         try:
@@ -103,7 +121,7 @@ class GoogleAPI:
                 async with httpx.AsyncClient(transport=self._transport, trust_env=False, follow_redirects=False,
                                              timeout=httpx.Timeout(10, connect=3)) as client:
                     headers = {"Authorization": "Bearer " + access} if access else {}
-                    async with client.stream(method, url, headers=headers, params=params, data=data) as response:
+                    async with client.stream(method, url, headers=headers, params=params, data=data, json=json_body) as response:
                         content = bytearray()
                         async for chunk in response.aiter_bytes(chunk_size=4096):
                             if len(content) + len(chunk) > cap:

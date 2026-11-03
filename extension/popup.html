@@ -12,19 +12,51 @@
   <body>
     <main>
       <h1>SUS.NOT</h1>
+
       <h2>Current tab URL</h2>
       <p id="current-url">Loading…</p>
-      <p>Analyze URL sends only this URL to your local backend. Guardian Mode automatically sends URLs only on websites you approve.</p>
+
+      <p>
+        Manual analysis sends the current URL to your local backend.
+        Guardian Mode can automatically analyze URLs on selected websites
+        or all websites, depending on your permission settings.
+      </p>
+
       <section aria-label="Guardian Mode">
         <h2>Guardian Mode: <span id="guardian-state">OFF</span></h2>
-        <button id="guardian-toggle" type="button" disabled>Enable Guardian for this website</button>
-        <button id="guardian-approve" type="button" hidden>Approve this website</button>
-        <p>Enabling requests Chrome permission for this website. Monitoring never reads page content. Permissions cover a hostname and scheme; SUS.NOT monitors only the exact approved origin (including port).</p>
+
+        <label for="guardian-mode">Monitoring mode</label>
+        <select id="guardian-mode">
+          <option value="OFF">OFF</option>
+          <option value="SELECTED_WEBSITES">Selected websites</option>
+          <option value="ALL_WEBSITES">All websites</option>
+        </select>
+
+        <button id="guardian-approve" type="button" hidden>
+          Approve this website
+        </button>
+
+        <button id="guardian-revoke-broad" type="button" hidden>
+          Revoke all-websites permission
+        </button>
+
+        <p>
+          Guardian Mode analyzes URLs locally without reading webpage content.
+          Selected Websites requires individual website approval.
+          All Websites requires explicit Chrome permission.
+          Turning monitoring OFF does not revoke previously granted permissions.
+        </p>
+
         <p id="guardian-status" role="status" aria-live="polite"></p>
+
         <h2>Approved websites</h2>
         <ul id="guardian-origins"></ul>
+
         <h2>Latest automatic assessment</h2>
-        <p id="guardian-assessment-status" role="status" aria-live="polite">Loading Guardian assessment…</p>
+        <p id="guardian-assessment-status" role="status" aria-live="polite">
+          Loading Guardian assessment…
+        </p>
+
         <section id="guardian-result" aria-label="Automatic URL assessment" hidden>
           <dl>
             <dt>SUS Score</dt>
@@ -32,14 +64,22 @@
             <dt>Risk level</dt>
             <dd id="guardian-risk"></dd>
           </dl>
+
           <h2>Detected indicators</h2>
           <ul id="guardian-indicators"></ul>
-          <p>Preliminary heuristic assessment, not proof of malicious activity. A low score does not guarantee safety.</p>
+
+          <p>
+            Preliminary heuristic assessment, not proof of malicious activity.
+            A low score does not guarantee safety.
+          </p>
+
           <p id="guardian-message"></p>
         </section>
       </section>
+
       <button id="analyze" type="button" disabled>Analyze URL</button>
       <p id="status" role="status" aria-live="polite"></p>
+
       <section id="result" aria-label="Manual URL analysis" hidden>
         <h2>Manual assessment</h2>
         <dl>
@@ -48,9 +88,15 @@
           <dt>Risk level</dt>
           <dd id="risk"></dd>
         </dl>
+
         <h2>Detected indicators</h2>
         <ul id="indicators"></ul>
-        <p>Preliminary heuristic assessment, not proof of malicious activity. A low score does not guarantee safety.</p>
+
+        <p>
+          Preliminary heuristic assessment, not proof of malicious activity.
+          A low score does not guarantee safety.
+        </p>
+
         <h2>Explanation</h2>
         <p id="message"></p>
       </section>

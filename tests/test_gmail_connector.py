@@ -44,6 +44,7 @@ class FakeConnector(GmailConnector):
             return RawMessage("different", b"synthetic body")
         return RawMessage(message_id, b"From: synthetic@example.com\n\nSynthetic body")
 
+
     async def _revoke(self):
         assert self._authorization.state == "disconnected"
         self.calls.append("revoke")

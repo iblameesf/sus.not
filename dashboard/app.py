@@ -240,9 +240,22 @@ def main():
     with st.sidebar:
         st.subheader("Safety Guardian")
         section = st.radio("Workspace", ["Overview", "URL Investigator", "AI Text Investigator",
-                                         "Investigation History", "Benchmarks", "Project Evidence"])
+                                         "Investigation History", "Benchmarks", "Project Evidence",
+                                         "Gmail Security"])
         st.caption("Local services only · no automatic collection")
         if st.button("Clear investigation session", help="Clears dashboard widget state and current results; not SQLite history."):
+            gmail_bridge = st.session_state.get("gmail_bridge")
+
+            if gmail_bridge is not None:
+                try:
+                    gmail_bridge.close()
+                except Exception:
+                    st.error(
+                        "Gmail session cleanup failed. "
+                        "Restart the local dashboard before reconnecting."
+                    )
+                    st.stop()
+
             st.session_state.clear()
             st.rerun()
     with DashboardClient() as client:
@@ -256,6 +269,9 @@ def main():
             history(client)
         elif section == "Benchmarks":
             benchmarks()
+        elif section == "Gmail Security":
+            from dashboard.gmail_page import gmail_security
+            gmail_security()
         else:
             evidence()
     st.divider()

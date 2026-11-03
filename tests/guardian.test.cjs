@@ -5,6 +5,7 @@ const test = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const vm = require("node:vm");
+const { webcrypto } = require("node:crypto");
 const path = require("node:path");
 const extension = path.join(__dirname, "../extension");
 
@@ -63,6 +64,7 @@ function harness() {
   };
   const context = vm.createContext({
     chrome, URL, AbortController, setTimeout, clearTimeout, console,
+    TextEncoder, Uint8Array, crypto: webcrypto,
     fetch: async (url, options) => {
       requests.push({ url, options });
       if (fetchImpl) return fetchImpl(url, options);
@@ -137,6 +139,12 @@ test("OFF by default; enable requires permission; unapproved origins are never s
   await h.navigate("https://user:secret@example.com/");
   assert.equal(h.requests.length, 0);
   await h.navigate("https://example.com/safe");
+  // Web Crypto digest resolves asynchronously; setImmediate flushing alone
+  // does not guarantee the automatic request has been dispatched.
+  const deadline = Date.now() + 2000;
+  while (h.requests.length === 0 && Date.now() < deadline) {
+    await new Promise((resolve) => setTimeout(resolve, 10));
+  }
   assert.equal(h.requests.length, 1);
   assert.equal(h.requests[0].url, "http://127.0.0.1:8000/analyze-url");
   assert.equal(h.requests[0].options.credentials, "omit");
@@ -230,44 +238,112 @@ test("manual popup analysis still works independently of Guardian", async () => 
 
 test("popup requests only the current host and does not enable after permission denial", async () => {
   const nodes = new Map();
-  const element = () => ({ hidden: false, disabled: false, handlers: {},
-    addEventListener(name, fn) { this.handlers[name] = fn; },
-    replaceChildren() {}, append() {}, textContent: "" });
+
+  const element = () => ({
+    hidden: false,
+    disabled: false,
+    value: "OFF",
+    textContent: "",
+    handlers: {},
+    addEventListener(name, fn) {
+      this.handlers[name] = fn;
+    },
+    replaceChildren() {},
+    append() {},
+    createElement() {}
+  });
+
   const document = {
-    getElementById(id) { if (!nodes.has(id)) nodes.set(id, element()); return nodes.get(id); },
-    createElement: element, createTextNode: (text) => text,
+    getElementById(id) {
+      if (!nodes.has(id)) nodes.set(id, element());
+      return nodes.get(id);
+    },
+    createElement: element,
+    createTextNode: (text) => text
   };
+
   const requested = [];
   const messages = [];
   let granted = false;
   let enabled = false;
+
   const context = vm.createContext({
-    document, URL, currentUrl: "https://example.com:8443/path", currentTabId: 1,
-    currentTabReady: Promise.resolve(), analyzeButton: element(), result: element(), status: element(),
+    document,
+    URL,
+    currentUrl: "https://example.com:8443/path",
+    currentTabId: 1,
+    currentTabReady: Promise.resolve(),
+    result: element(),
+    status: element(),
     renderResult() {},
     chrome: {
       tabs: { onUpdated: { addListener() {} } },
       storage: { onChanged: { addListener() {} } },
-      permissions: { request: async (permission) => { requested.push(permission); return granted; } },
-      runtime: { sendMessage: async (message) => {
-        messages.push(message);
-        if (message.type === "guardian-enable") { enabled = true; return { ok: true }; }
-        return { enabled, origins: enabled ? ["https://example.com:8443"] : [] };
-      } },
-    },
+      permissions: {
+        contains: async () => false,
+        request: async (permission) => {
+          requested.push(permission);
+          return granted;
+        }
+      },
+      runtime: {
+        sendMessage: async (message) => {
+          messages.push(message);
+
+          if (message.type === "guardian-enable") {
+            enabled = true;
+            return { ok: true };
+          }
+
+          return {
+            mode: enabled ? "SELECTED_WEBSITES" : "OFF",
+            enabled,
+            origins: enabled ? ["https://example.com:8443"] : [],
+            allBroadGranted: false
+          };
+        }
+      }
+    }
   });
-  for (const file of ["guardian-core.js", "guardian-popup.js"]) {
-    vm.runInContext(fs.readFileSync(path.join(extension, file), "utf8"), context);
+
+  for (const name of ["guardian-core.js", "guardian-popup.js"]) {
+    vm.runInContext(
+      fs.readFileSync(path.join(extension, name), "utf8"),
+      context
+    );
   }
-  for (let i = 0; i < 5; i++) await new Promise(setImmediate);
+
+  for (let i = 0; i < 5; i++) {
+    await new Promise(setImmediate);
+  }
+
   assert.equal(nodes.get("guardian-state").textContent, "OFF");
-  await nodes.get("guardian-toggle").handlers.click();
+
+  await nodes.get("guardian-approve").handlers.click();
+
+  assert.equal(requested.length, 1);
   assert.equal(requested[0].origins[0], "https://example.com/*");
-  assert.equal(messages.filter((message) => message.type === "guardian-enable").length, 0);
+  assert.equal(
+    messages.filter(message => message.type === "guardian-enable").length,
+    0
+  );
+  assert.equal(nodes.get("guardian-state").textContent, "OFF");
+
   granted = true;
-  await nodes.get("guardian-toggle").handlers.click();
-  assert.equal(messages.filter((message) => message.type === "guardian-enable").length, 1);
-  assert.equal(nodes.get("guardian-state").textContent, "ON");
+
+  await nodes.get("guardian-approve").handlers.click();
+
+  assert.equal(requested.length, 2);
+  assert.equal(
+    messages.filter(message => message.type === "guardian-enable").length,
+    1
+  );
+
+  const approval = messages.find(message => message.type === "guardian-enable");
+
+  assert.equal(approval.url, "https://example.com:8443/path");
+  assert.equal(nodes.get("guardian-state").textContent, "SELECTED_WEBSITES");
+  assert.equal(nodes.get("guardian-approve").hidden, true);
 });
 
 test("separate loading, URL and completion events analyze once, store 70, warn, and populate popup", async () => {
@@ -280,7 +356,7 @@ test("separate loading, URL and completion events analyze once, store 70, warn, 
   assert.equal(h.requests.length, 0);
   await h.update({ status: "complete" });
   assert.equal(h.requests.length, 1);
-  assert.equal(JSON.parse(h.requests[0].options.body).url, "https://example.com/automatic-70");
+  assert.equal(JSON.parse(h.requests[0].options.body).url, "https://example.com");
   assert.equal(h.session.results[1].data.sus_score, 70);
   const warnings = h.injections.filter((item) => item.func.name === "showWarning");
   assert.equal(warnings.length, 1);

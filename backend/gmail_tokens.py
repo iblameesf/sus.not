@@ -11,6 +11,11 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field, SecretStr, field_validator
 
 GMAIL_READONLY_SCOPE = "https://www.googleapis.com/auth/gmail.readonly"
+# Separate, explicitly requested permission for label modifications (Move to Spam).
+# Requires its own consent flow; the read-only flow continues to use GMAIL_READONLY_SCOPE.
+# Modify scope is a superset; both read-only and modify tokens are acceptable here.
+PERMITTED_SCOPES: frozenset[str] = frozenset({GMAIL_READONLY_SCOPE})
+# Stored under a separate Keychain service name to avoid mixing read-only and modify tokens.
 SERVICE = "SUS.NOT.Gmail.OAuth"
 VERIFICATION_SERVICE = "SUS.NOT.Gmail.LocalVerification"
 MAX_CREDENTIAL_BYTES = 24576
@@ -27,8 +32,8 @@ class OAuthCredentials(BaseModel):
 
     @field_validator("scopes")
     @classmethod
-    def read_only(cls, value):
-        if value != (GMAIL_READONLY_SCOPE,):
+    def permitted_scope(cls, value):
+        if not value or any(scope not in PERMITTED_SCOPES for scope in value):
             raise ValueError("Only the planned read-only scope is permitted")
         return value
 

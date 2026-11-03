@@ -1,0 +1,39 @@
+{
+  "project": "SUS.NOT",
+  "timestamp_utc": "2026-11-02T19:43:19.978263+00:00",
+  "model": "qwen3.5:4b-q4_K_M",
+  "tool": "inspect_url",
+  "events": [
+    {
+      "operation": "model_tool_selection",
+      "tool_calls": [
+        {
+          "id": "call_0b2hh24b",
+          "function": {
+            "index": 0,
+            "name": "inspect_url",
+            "arguments": {
+              "url": "https://user@192.0.2.1/verify"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "operation": "mcp_tool_invocation",
+      "arguments": {
+        "url": "https://user@192.0.2.1/verify"
+      },
+      "result": {
+        "sus_score": 70,
+        "risk_level": "high",
+        "indicators": [
+          "IP address used instead of a domain (+30)",
+          "@ character in URL authority (+25)",
+          "Path contains verify or urgent (+15)"
+        ],
+        "explanation": "The experimental SUS Score is a heuristic, not a probability of fraud. A low score does not guarantee safety. The URL was not visited."
+      }
+    }
+  ]
+}

@@ -37,3 +37,20 @@ node_modules/
 .DS_Store
 
 .streamlit/
+
+# Temporary development backups
+*.py.backup
+*.demo-backup.py
+PATCH_README.txt
+
+# Incomplete experimental benchmark
+evidence/block9_comparison.json
+
+# Generated test logs
+evidence/final-*.log
+
+# Documentation backups
+*.md.backup
+
+# Evidence pending privacy review
+evidence/blocks3-4-verification.json

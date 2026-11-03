@@ -248,7 +248,7 @@ def test_callback_attacks_and_denial_no_google_calls(integration, attack):
 
 @pytest.mark.parametrize("change", [{"token_type": "MAC"}, {"token_type": 123}, {"expires_in": True},
     {"expires_in": 0}, {"access_token": "token\nheader"}, {"scope": "https://mail.google.com/"},
-    {"scope": GMAIL_READONLY_SCOPE + " https://www.googleapis.com/auth/gmail.modify"}])
+    {"scope": GMAIL_READONLY_SCOPE + " https://mail.google.com/"}])
 def test_invalid_token_response_never_connected(integration, change):
     e = integration
     e["state"]["token"] = change

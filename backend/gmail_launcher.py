@@ -109,6 +109,7 @@ class TrustedLauncher:
             async with asyncio.timeout(900):
                 response = await self._client.request(method, path, headers=headers, json=payload, params=params)
             if response.status_code != 200:
+                print(f"[GMAIL DEBUG] operation={operation} HTTP={response.status_code}", flush=True)
                 raise LauncherError()
             value = response.json()
             if not isinstance(value, dict):

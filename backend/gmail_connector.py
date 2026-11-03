@@ -27,6 +27,8 @@ def gmail_endpoint(operation: str, *, message_id: str | None = None) -> str:
         return GMAIL_BASE + "/messages"
     if operation == "get" and valid_message_id(message_id):
         return GMAIL_BASE + "/messages/" + message_id
+    if operation == "modify" and valid_message_id(message_id):
+        return GMAIL_BASE + "/messages/" + message_id + "/modify"
     raise ConnectorError()
 
 
@@ -161,6 +163,7 @@ class GmailConnector(ABC):
             # A future UI must distinguish local disconnection from remote revocation failure.
             raise ConnectorError() from None
 
+
     @abstractmethod
     async def _authorized_account(self) -> AccountIdentity: ...
 
@@ -172,6 +175,7 @@ class GmailConnector(ABC):
 
     @abstractmethod
     async def _revoke(self) -> None: ...
+
 
 
 class GoogleGmailConnector(GmailConnector):

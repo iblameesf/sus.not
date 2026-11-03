@@ -1,0 +1,33 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.12.4, pytest-9.2.0, pluggy-1.7.0 -- /Users/e.s.franklin/Projects/sus-not/.venv/bin/python
+cachedir: .pytest_cache
+rootdir: /Users/e.s.franklin/Projects/sus-not
+plugins: anyio-4.15.1
+collecting ... collected 24 items
+
+tests/test_mcp_server.py::test_stdio_discovery_and_url_invocation PASSED [  4%]
+tests/test_mcp_server.py::test_url_is_never_fetched PASSED               [  8%]
+tests/test_mcp_server.py::test_invalid_url[not-a-url] PASSED             [ 12%]
+tests/test_mcp_server.py::test_invalid_url[https://] PASSED              [ 16%]
+tests/test_mcp_server.py::test_invalid_url[https:///example.com] PASSED  [ 20%]
+tests/test_mcp_server.py::test_invalid_url[ftp://example.com] PASSED     [ 25%]
+tests/test_mcp_server.py::test_invalid_url[javascript:alert(1)] PASSED   [ 29%]
+tests/test_mcp_server.py::test_invalid_url[https://[invalid]/] PASSED    [ 33%]
+tests/test_mcp_server.py::test_invalid_url[https://example.com:99999] PASSED [ 37%]
+tests/test_mcp_server.py::test_invalid_url[https://example.com:bad] PASSED [ 41%]
+tests/test_mcp_server.py::test_invalid_url[https://exa mple.com] PASSED  [ 45%]
+tests/test_mcp_server.py::test_invalid_url[https://example.com/\n] PASSED [ 50%]
+tests/test_mcp_server.py::test_invalid_url[https://example.com\\path] PASSED [ 54%]
+tests/test_mcp_server.py::test_invalid_url[//example.com] PASSED         [ 58%]
+tests/test_mcp_server.py::test_invalid_url[file:///etc/passwd] PASSED    [ 62%]
+tests/test_mcp_server.py::test_invalid_text_without_ollama[] PASSED      [ 66%]
+tests/test_mcp_server.py::test_invalid_text_without_ollama[ \n\t] PASSED [ 70%]
+tests/test_mcp_server.py::test_invalid_text_without_ollama[text2] PASSED [ 75%]
+tests/test_mcp_server.py::test_valid_text_and_instruction_boundary PASSED [ 79%]
+tests/test_mcp_server.py::test_text_boundary PASSED                      [ 83%]
+tests/test_mcp_server.py::test_ollama_failure_is_sanitized[200-True] PASSED [ 87%]
+tests/test_mcp_server.py::test_ollama_failure_is_sanitized[404-False] PASSED [ 91%]
+tests/test_mcp_server.py::test_ollama_failure_is_sanitized[500-False] PASSED [ 95%]
+tests/test_mcp_server.py::test_ollama_failure_is_sanitized[302-False] PASSED [100%]
+
+============================== 24 passed in 1.73s ==============================

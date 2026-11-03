@@ -147,7 +147,7 @@ def test_size_limits(client, local_tools):
     assert client.post("/investigate-email", content=b"x" * (guardian.MAX_REQUEST_BYTES + 1)).status_code == 413
     assert post(client, {"text_body": "x" * (MAX_BODY_CHARS + 1)}).status_code == 422
     assert client.post("/investigate-email", json={"raw_email": "x" * (MAX_BODY_CHARS + 1)}).status_code == 413
-    assert post(client, {"text_body": "x" * 15000, "html_body": "y" * 15000}).status_code == 413
+    assert post(client, {"text_body": "x" * (MAX_BODY_CHARS // 2 + 1), "html_body": "y" * (MAX_BODY_CHARS // 2 + 1)}).status_code == 413
     assert post(client, {"html_body": "<i>" * 2001}).status_code == 413
     assert calls == []
 
@@ -265,8 +265,14 @@ def test_provenance_correlation_and_repeatable_policy(client, local_tools):
     ids = {e["evidence_id"] for e in first["evidence"]}
     assert len(ids) == len(first["evidence"])
     assert all(e["finding"] and e["limitations"] and e["supporting_reference"] for e in first["evidence"])
-    assert {e["source_component"] for e in first["evidence"]} == {"email_metadata", "email_parser", "inspect_url", "inspect_text"}
-    assert {c["rule_id"] for c in first["correlation_findings"]} == {"sender_and_link_mismatch", "url_and_content_concern"}
+    assert {e["source_component"] for e in first["evidence"]} == {"email_metadata", "email_parser", "inspect_url"}
+    assert first["ai_text_assessment"] is not None
+    assert all(e["source_component"] != "inspect_text" for e in first["evidence"])
+    assert {c["rule_id"] for c in first["correlation_findings"]} == {"sender_and_link_mismatch"}
+    assert all(
+        c["rule_id"] != "url_and_content_concern"
+        for c in first["correlation_findings"]
+    )
     assert all(set(c["evidence_ids"]) <= ids for c in first["correlation_findings"])
     assert set(first["recommended_advisory_action"]["evidence_ids"]) <= ids
     assert "sus_score" not in first and "fraud_probability" not in first

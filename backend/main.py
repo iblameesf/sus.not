@@ -1,3 +1,4 @@
+import os
 from contextlib import asynccontextmanager
 from ipaddress import ip_address
 from typing import Literal
@@ -116,6 +117,15 @@ def investigate_url(
     x_susnot_record_history: str | None = Header(default=None),
 ) -> AnalyzeURLResponse:
     result = analyze_url(request)
+    # Explicitly enabled, loopback-only synthetic fixture for end-to-end Chrome UI testing.
+    # Never enabled by default and never represents a real phishing verdict.
+    if (os.environ.get("SUSNOT_DEMO_MODE") == "1"
+            and request.url == "http://127.0.0.1:8765"):
+        result = AnalyzeURLResponse(
+            url=request.url, sus_score=70, risk_level="high",
+            indicators=["SYNTHETIC DEMO FIXTURE: controlled warning-pipeline validation (+70)"],
+            message="Synthetic demonstration only; not a phishing assessment. URL was not visited.",
+        )
     record_history(
         x_susnot_record_history, investigation_type="URL",
         redacted_url=redact_url(request.url), sus_score=result.sus_score,

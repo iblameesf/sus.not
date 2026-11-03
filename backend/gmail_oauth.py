@@ -14,7 +14,10 @@ from pydantic import SecretStr
 
 from backend.gmail_callback import LoopbackCallback, valid_loopback_redirect
 from backend.gmail_google import GoogleAPI, GmailError, token_response
-from backend.gmail_tokens import CredentialStoreError, GMAIL_READONLY_SCOPE, MacOSKeychainStore
+from backend.gmail_tokens import (
+    CredentialStoreError, GMAIL_READONLY_SCOPE,
+    MacOSKeychainStore,
+)
 from backend.gmail_state import AuthorizationError
 
 AUTHORIZATION_ENDPOINT = "https://accounts.google.com/o/oauth2/v2/auth"
@@ -373,34 +376,46 @@ class GmailService:
 
     async def disconnect(self, session):
         conn = self._connection(session)
-        session.authorization.disconnect()  # Stop reads before awaiting any lock/network.
+        session.authorization.disconnect()
         self.control.selections.invalidate_session(session.session_id)
+
         if conn.pending:
             conn.pending.close()
             conn.pending = None
-        async with conn.lock:
-            errors, revoked, removed = [], False, True
-            if conn.credentials:
-                token = conn.credentials.refresh_token or conn.credentials.access_token
-                try:
-                    await self.api.revoke(token.get_secret_value())
-                    revoked = True
-                except GmailError:
-                    errors.append("revocation_unconfirmed")
-            if conn.remember and conn.account_id:
-                try:
-                    self.store.delete(conn.account_id)
-                    if self.store.load(conn.account_id) is not None:
-                        raise CredentialStoreError()
-                except CredentialStoreError:
-                    removed = False
-                    errors.append("credential_storage_unavailable")
-            conn.credentials = None
-            if removed:
-                conn.remember = False
-                conn.account_id, conn.address = None, None
-            return {"disconnected": True, "google_revocation_performed": revoked,
-                    "credentials_removed": removed, "errors": errors}
+
+        errors = []
+        revoked = False
+        removed = True
+
+        if conn.credentials:
+            token = conn.credentials.refresh_token or conn.credentials.access_token
+            try:
+                await self.api.revoke(token.get_secret_value())
+                revoked = True
+            except GmailError:
+                errors.append("revocation_unconfirmed")
+
+        if conn.remember and conn.account_id:
+            try:
+                self.store.delete(conn.account_id)
+                if self.store.load(conn.account_id) is not None:
+                    raise CredentialStoreError()
+            except CredentialStoreError:
+                removed = False
+                errors.append("credential_storage_unavailable")
+
+        conn.credentials = None
+
+        if removed:
+            conn.remember = False
+            conn.account_id, conn.address = None, None
+
+        return {
+            "disconnected": True,
+            "google_revocation_performed": revoked,
+            "credentials_removed": removed,
+            "errors": errors,
+        }
 
     def connector(self, session):
         from backend.gmail_connector import GoogleGmailConnector
@@ -438,9 +453,21 @@ class GmailService:
         # Guard only model-owned prose. A credential coincidentally equal to an
         # action/version must not rewrite deterministic policy, evidence IDs or scores.
         # One pass avoids repeatedly expanding replacement markers for short literals.
-        pattern = re.compile("|".join(re.escape(value) for value in sorted(private_literals, key=len, reverse=True)))
+        # Never compile an empty alternative: it matches every position.
+        # Ignore empty credential literals while preserving redaction.
+        protected_literals = [
+            value for value in private_literals
+            if isinstance(value, str) and value
+        ]
+        pattern = (
+            re.compile("|".join(
+                re.escape(value)
+                for value in sorted(protected_literals, key=len, reverse=True)
+            ))
+            if protected_literals else None
+        )
         def scrub(value, limit):
-            return pattern.sub("[credential redacted]", value)[:limit]
+            return (pattern.sub("[credential redacted]", value) if pattern else value)[:limit]
         for item in results:
             report = item.get("report")
             if not report or not report["ai_text_assessment"]:
@@ -451,7 +478,7 @@ class GmailService:
             ai["indicators"] = [scrub(value, 300) for value in ai["indicators"]]
             for name in ("explanation", "recommendation"):
                 ai[name] = scrub(ai[name], 1500)
-            if pattern.search(original_uncertainty):
+            if pattern is not None and pattern.search(original_uncertainty):
                 prefix = original_uncertainty.removesuffix(ASSESSMENT_LIMITATION).rstrip()
                 ai["uncertainty"] = scrub(prefix, 1000 - len(ASSESSMENT_LIMITATION) - 2) + "\n\n" + ASSESSMENT_LIMITATION
             if ai != original_assessment:

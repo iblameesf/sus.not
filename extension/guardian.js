@@ -8,14 +8,24 @@ let settingsQueue = Promise.resolve();
 let sessionQueue = Promise.resolve();
 
 async function settings() {
-  const saved = await chrome.storage.local.get({ guardianEnabled: false, approvedOrigins: [] });
-  return { enabled: saved.guardianEnabled === true, origins: saved.approvedOrigins };
+  const saved = await chrome.storage.local.get({ guardianMode: "OFF", approvedOrigins: [], allBroadGranted: false, guardianEnabled: false });
+  const mode = saved.guardianMode || (saved.guardianEnabled ? "SELECTED_WEBSITES" : "OFF");
+  return { mode, enabled: mode !== "OFF", origins: saved.approvedOrigins || [], allBroadGranted: !!saved.allBroadGranted };
 }
 
 async function allowed(url) {
   const origin = Guardian.origin(url);
+  if (!origin) return false;
   const state = await settings();
-  return Boolean(origin && state.enabled && state.origins.includes(origin) &&
+  if (state.mode === "OFF") return false;
+  // ALL_WEBSITES requires explicit broad host permission grant
+  if (state.mode === "ALL_WEBSITES") {
+    return Boolean(state.allBroadGranted &&
+      await chrome.permissions.contains({ origins: ["http://*/*", "https://*/*"] }) &&
+      ["http:", "https:"].includes(new URL(url).protocol) && !new URL(url).username && !new URL(url).password);
+  }
+  // SELECTED_WEBSITES: preserve exact approved-origin behavior
+  return Boolean(state.origins.includes(origin) &&
     await chrome.permissions.contains({ origins: [Guardian.pattern(origin)] }));
 }
 
@@ -80,13 +90,13 @@ function showWarning(data, expectedUrl) {
 }
 
 async function clearWarnings() {
-  const state = await settings();
   const tabs = await chrome.tabs.query({});
   await Promise.all(tabs.map(async (tab) => {
-    const origin = Guardian.origin(tab.url);
-    if (!origin || !state.origins.includes(origin)) return;
-    if (!await chrome.permissions.contains({ origins: [Guardian.pattern(origin)] })) return;
-    await chrome.scripting.executeScript({ target: { tabId: tab.id }, func: removeWarning }).catch(() => {});
+    if (!tab.id || !Guardian.origin(tab.url)) return;
+    await chrome.scripting.executeScript({
+      target: { tabId: tab.id },
+      func: removeWarning
+    }).catch(() => {});
   }));
 }
 
@@ -98,6 +108,7 @@ async function analyze(tabId, url) {
   const job = { url, controller, revision };
   pending.set(tabId, job);
   const timer = setTimeout(() => controller.abort(), 10000);
+  let fingerprint = null;
   const stillCurrent = async () => {
     if (job.revision !== revision || pending.get(tabId) !== job || !await allowed(url)) return false;
     const tab = await chrome.tabs.get(tabId).catch(() => null);
@@ -107,9 +118,13 @@ async function analyze(tabId, url) {
   try {
     // Check again immediately before sending, including navigation/setting races.
     if (!await stillCurrent()) return;
+    // Conservative URL minimization for automatic monitoring
+    const minimized = Guardian.minimizeUrl(url);
+    fingerprint = await Guardian.fingerprint(url);
+    if (!minimized || !fingerprint) return;
     const response = await fetch("http://127.0.0.1:8000/analyze-url", {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ url }), credentials: "omit", redirect: "error",
+      body: JSON.stringify({ url: minimized }), credentials: "omit", redirect: "error",
       cache: "no-store", signal: controller.signal,
     });
     if (!response.ok) throw new Error("Backend unavailable");
@@ -120,21 +135,31 @@ async function analyze(tabId, url) {
     let suppressionUntil;
     await updateSession((state) => {
       if (job.revision !== revision || pending.get(tabId) !== job) return;
-      state.results[tabId] = { url, data };
-      if (data.sus_score >= Guardian.threshold && !state.suppressed[url]) {
+      const { url: _discardedUrl, ...safeData } = data;
+      state.results[tabId] = { fingerprint, data: safeData };
+      if (data.sus_score >= Guardian.threshold && !state.suppressed[fingerprint]) {
         suppressionUntil = Date.now() + Guardian.suppressionMs;
-        state.suppressed[url] = suppressionUntil;
+        state.suppressed[fingerprint] = suppressionUntil;
         warn = true;
       }
     });
+    // Update tab-specific action badge based on score
+    try {
+      const tab = await chrome.tabs.get(tabId).catch(() => null);
+      if (tab && tab.active) {
+        const badge = Guardian.riskBadge(data.sus_score);
+        await chrome.action.setBadgeText({ text: badge.text, tabId });
+        await chrome.action.setBadgeBackgroundColor({ color: badge.color, tabId });
+      }
+    } catch { /* badge updates are advisory only */ }
     if (!warn || !await stillCurrent()) return;
     try {
       await chrome.scripting.executeScript({ target: { tabId }, func: showWarning, args: [data, url] });
     } catch {
       // A UI/host-access failure must not discard a successful backend assessment.
       await updateSession((state) => {
-        if (state.suppressed[url] === suppressionUntil) delete state.suppressed[url];
-        if (job.revision === revision && pending.get(tabId) === job && state.results[tabId]?.url === url) {
+        if (state.suppressed[fingerprint] === suppressionUntil) delete state.suppressed[fingerprint];
+        if (job.revision === revision && pending.get(tabId) === job && state.results[tabId]?.fingerprint === fingerprint) {
           state.results[tabId].warningError = "Automatic assessment complete, but the page warning could not be displayed. Review the score and indicators below.";
         }
       });
@@ -145,21 +170,46 @@ async function analyze(tabId, url) {
       const tab = await chrome.tabs.get(tabId).catch(() => null);
       const origin = Guardian.origin(tab?.url);
       const state = await settings();
-      if (origin && state.origins.includes(origin) &&
-          await chrome.permissions.contains({ origins: [Guardian.pattern(origin)] })) {
-        await chrome.scripting.executeScript({ target: { tabId }, func: removeWarning });
+      const hasSelectedPermission = origin &&
+        await chrome.permissions.contains({ origins: [Guardian.pattern(origin)] });
+      const hasBroadPermission =
+        await chrome.permissions.contains({ origins: ["http://*/*", "https://*/*"] });
+
+      if (hasSelectedPermission || hasBroadPermission) {
+        await chrome.scripting.executeScript({
+          target: { tabId },
+          func: removeWarning
+        }).catch(() => {});
       }
     }
   } catch {
     if (await stillCurrent()) {
       await updateSession((state) => {
-        if (job.revision === revision && pending.get(tabId) === job) state.results[tabId] = { url, error: "Automatic analysis unavailable. Check the local backend or use Analyze URL to retry." };
+        if (job.revision === revision && pending.get(tabId) === job) state.results[tabId] = { fingerprint, error: "Automatic analysis unavailable. Check the local backend or use Analyze URL to retry." };
       });
     }
   } finally {
     clearTimeout(timer);
     if (pending.get(tabId) === job) pending.delete(tabId);
   }
+}
+
+async function setBadgeForTab(tabId, score) {
+  try {
+    const tab = await chrome.tabs.get(tabId).catch(() => null);
+    if (tab && tab.active) {
+      const badge = Guardian.riskBadge(score);
+      await chrome.action.setBadgeText({ text: badge.text, tabId });
+      await chrome.action.setBadgeBackgroundColor({ color: badge.color, tabId });
+    }
+  } catch {}
+}
+
+async function clearBadge() {
+  try {
+    await chrome.action.setBadgeText({ text: "" });
+    await chrome.action.setBadgeBackgroundColor({ color: "#6b7280" });
+  } catch {}
 }
 
 function invalidate() {
@@ -185,6 +235,8 @@ chrome.tabs.onRemoved.addListener((tabId) => {
   pending.get(tabId)?.controller.abort();
   pending.delete(tabId);
   void updateSession((state) => { delete state.results[tabId]; });
+  // Clear badge when the last tracked tab is removed
+  if (pending.size === 0) void clearBadge();
 });
 
 async function handleMessage(message) {
@@ -192,21 +244,81 @@ async function handleMessage(message) {
     const state = await settings();
     const { results = {} } = await chrome.storage.session.get("results");
     const entry = results[message.tabId];
-    return { ...state, result: state.enabled && entry?.url === message.url ? entry : null };
+    const fingerprint = await Guardian.fingerprint(message.url);
+    return {
+      ...state,
+      result: state.enabled && fingerprint && entry?.fingerprint === fingerprint
+        ? entry
+        : null
+    };
   }
   if (message.type === "guardian-enable") {
+    // Preserve selected-website approval; this activates SELECTED_WEBSITES mode
     const origin = Guardian.origin(message.url);
     if (!origin || !await chrome.permissions.contains({ origins: [Guardian.pattern(origin)] })) {
       throw new Error("Website permission is required before enabling monitoring.");
     }
     const state = await settings();
-    await chrome.storage.local.set({ guardianEnabled: true, approvedOrigins: [...new Set([...state.origins, origin])] });
+    await chrome.storage.local.set({ guardianMode: "SELECTED_WEBSITES", guardianEnabled: true, approvedOrigins: [...new Set([...state.origins, origin])] });
+    return { ok: true };
+  }
+  if (message.type === "guardian-set-mode") {
+    const requested = message.mode;
+    if (requested === Guardian.Mode.OFF) {
+      invalidate();
+      await chrome.storage.local.set({ guardianMode: "OFF", guardianEnabled: false });
+      await clearWarnings();
+      await clearBadge();
+      await updateSession((state) => { state.results = {}; state.suppressed = {}; });
+      return { ok: true };
+    }
+    if (requested === Guardian.Mode.SELECTED_WEBSITES) {
+      await chrome.storage.local.set({ guardianMode: "SELECTED_WEBSITES", guardianEnabled: true });
+      return { ok: true };
+    }
+    if (requested === Guardian.Mode.ALL_WEBSITES) {
+      // The popup requests permission directly during the user gesture.
+      // The background verifies permission before activating universal monitoring.
+      const granted = await chrome.permissions.contains({ origins: ["http://*/*", "https://*/*"] });
+      if (!granted) {
+        return { error: "Broad host permission is required. Previous monitoring mode preserved.", preservedMode: (await settings()).mode };
+      }
+      await chrome.storage.local.set({ guardianMode: "ALL_WEBSITES", guardianEnabled: true, allBroadGranted: true });
+      return { ok: true, mode: "ALL_WEBSITES" };
+    }
+    throw new Error("Unknown mode");
+  }
+  if (message.type === "guardian-revoke-broad") {
+    invalidate();
+    await clearWarnings();
+
+    const broadOrigins = ["http://*/*", "https://*/*"];
+    const removed = await chrome.permissions.remove({ origins: broadOrigins });
+    const stillGranted = await chrome.permissions.contains({ origins: broadOrigins });
+
+    if (!removed || stillGranted) {
+      return { error: "Could not revoke all-websites permission. Check Chrome site access." };
+    }
+
+    await chrome.storage.local.set({
+      guardianMode: "SELECTED_WEBSITES",
+      guardianEnabled: true,
+      allBroadGranted: false
+    });
+
+    await clearBadge();
+    await updateSession((state) => {
+      state.results = {};
+      state.suppressed = {};
+    });
+
     return { ok: true };
   }
   if (message.type === "guardian-disable") {
     invalidate();
-    await chrome.storage.local.set({ guardianEnabled: false });
+    await chrome.storage.local.set({ guardianMode: "OFF", guardianEnabled: false });
     await clearWarnings();
+    await clearBadge();
     await updateSession((state) => { state.results = {}; state.suppressed = {}; });
     return { ok: true };
   }
@@ -244,8 +356,12 @@ chrome.permissions.onRemoved.addListener(() => {
     for (const origin of state.origins) {
       if (await chrome.permissions.contains({ origins: [Guardian.pattern(origin)] })) origins.push(origin);
     }
-    await chrome.storage.local.set({ approvedOrigins: origins });
+    // If broad permissions were revoked, revert from ALL_WEBSITES to SELECTED_WEBSITES
+    const hasBroad = await chrome.permissions.contains({ origins: ["http://*/*", "https://*/*"] });
+    const newMode = (state.mode === "ALL_WEBSITES" && !hasBroad) ? "SELECTED_WEBSITES" : state.mode;
+    await chrome.storage.local.set({ approvedOrigins: origins, guardianMode: newMode, allBroadGranted: hasBroad, guardianEnabled: newMode !== "OFF" });
     await updateSession((session) => { session.results = {}; session.suppressed = {}; });
+    if (newMode === "OFF") await clearBadge();
   });
   settingsQueue = task.catch(() => {});
 });

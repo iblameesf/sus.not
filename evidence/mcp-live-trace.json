@@ -1,0 +1,83 @@
+{
+  "project": "SUS.NOT",
+  "evidence_type": "Real MCP subprocess invocation",
+  "timestamp_utc": "2026-11-02T19:42:44.966001+00:00",
+  "transport": "stdio",
+  "server": "backend.mcp_server",
+  "model_used": false,
+  "events": [
+    {
+      "operation": "initialize",
+      "server_name": "SUS.NOT",
+      "protocol_version": "2025-11-25"
+    },
+    {
+      "operation": "tools/list",
+      "tools": [
+        {
+          "name": "inspect_url",
+          "description": "Inspect an absolute HTTP(S) URL using deterministic heuristics, without visiting it.",
+          "input_schema": {
+            "properties": {
+              "url": {
+                "title": "Url",
+                "type": "string"
+              }
+            },
+            "required": [
+              "url"
+            ],
+            "type": "object",
+            "title": "inspect_urlArguments"
+          }
+        },
+        {
+          "name": "inspect_text",
+          "description": "Investigate nonblank text (at most 5,000 characters) with local Qwen only.",
+          "input_schema": {
+            "properties": {
+              "text": {
+                "title": "Text",
+                "type": "string"
+              }
+            },
+            "required": [
+              "text"
+            ],
+            "type": "object",
+            "title": "inspect_textArguments"
+          }
+        }
+      ]
+    },
+    {
+      "operation": "tools/call",
+      "tool": "inspect_url",
+      "arguments": {
+        "url": "https://user@192.0.2.1/verify"
+      },
+      "is_error": false,
+      "response": {
+        "sus_score": 70,
+        "risk_level": "high",
+        "indicators": [
+          "IP address used instead of a domain (+30)",
+          "@ character in URL authority (+25)",
+          "Path contains verify or urgent (+15)"
+        ],
+        "explanation": "The experimental SUS Score is a heuristic, not a probability of fraud. A low score does not guarantee safety. The URL was not visited."
+      }
+    },
+    {
+      "operation": "tools/call",
+      "tool": "inspect_url",
+      "arguments": {
+        "url": "file:///etc/passwd"
+      },
+      "is_error": true,
+      "response": [
+        "Error executing tool inspect_url: Invalid URL: provide a well-formed absolute HTTP or HTTPS URL."
+      ]
+    }
+  ]
+}

@@ -12,7 +12,7 @@ from urllib.parse import urlsplit
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 MAX_EMAIL_BYTES = 128 * 1024
-MAX_BODY_CHARS = 20000
+MAX_BODY_CHARS = 50000
 MAX_PARTS = 30
 MAX_DEPTH = 8
 MAX_URLS = 10
@@ -236,6 +236,10 @@ def read_raw(raw: str | bytes) -> tuple[dict, list[str], list[str]]:
 
 
 def parse_email(request: EmailInvestigationRequest | bytes) -> ParsedEmail:
+    raw_mime = isinstance(request, bytes) or (
+        isinstance(request, EmailInvestigationRequest)
+        and request.raw_email is not None
+    )
     if isinstance(request, bytes):
         headers, texts, htmls = read_raw(request)
     elif request.raw_email is not None:
@@ -249,11 +253,21 @@ def parse_email(request: EmailInvestigationRequest | bytes) -> ParsedEmail:
         texts, htmls = [fields.text_body or ""], [fields.html_body or ""]
         if len(request.model_dump_json().encode()) > MAX_EMAIL_BYTES:
             raise EmailParseError("email_size_limit", 413)
+    html_omitted = False
     if sum(map(len, texts + htmls)) > MAX_BODY_CHARS:
-        raise EmailParseError("body_limit", 413)
+        # A large HTML alternative must not prevent bounded inspection of
+        # a complete, independently available plain-text alternative.
+        # Never truncate either representation or claim HTML was inspected.
+        if raw_mime and htmls and any(text.strip() for text in texts) and sum(map(len, texts)) <= MAX_BODY_CHARS:
+            htmls = []
+            html_omitted = True
+        else:
+            raise EmailParseError("body_limit", 413)
     sender = address_domain(headers.get("From"), "From")
     reply = address_domain(headers.get("Reply-To"), "Reply-To")
     indicators, errors = [], []
+    if html_omitted:
+        errors.append(("html_omitted_body_limit", "body.html"))
     if sender is None:
         indicators.append(("missing_sender", "metadata.sender"))
     if sender and reply and sender != reply:

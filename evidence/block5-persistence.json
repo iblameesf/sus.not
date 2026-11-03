@@ -1,0 +1,34 @@
+{
+  "project": "SUS.NOT",
+  "timestamp_utc": "2026-11-02T20:17:22.147186+00:00",
+  "block": 5,
+  "test": "Investigation memory survives process restart",
+  "writer_process": "terminated",
+  "reader_process": "separate Python interpreter",
+  "persistence": "SQLite",
+  "result": "PASS",
+  "record": {
+    "investigation_id": "3716dca5-7abc-44a5-ba79-f53109a49807",
+    "timestamp_utc": "2026-11-02T20:17:21.779330+00:00",
+    "investigation_type": "URL",
+    "redacted_url": "https://[redacted]",
+    "sus_score": 70,
+    "risk_level": "high",
+    "indicators": [
+      "Synthetic suspicious URL"
+    ],
+    "recommended_action": "Verify independently",
+    "policy_version": "block5-test",
+    "analysis_status": "completed"
+  },
+  "privacy": {
+    "raw_url_stored": false,
+    "hostname_stored": false,
+    "temporary_database": true
+  },
+  "limitations": [
+    "Demonstrates persisted investigation metadata.",
+    "Does not demonstrate conversational memory or model recall.",
+    "Does not measure LLM context-window token consumption."
+  ]
+}

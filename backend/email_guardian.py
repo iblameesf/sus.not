@@ -138,11 +138,10 @@ async def investigate_email(request: EmailInvestigationRequest | bytes, consent:
                                 original = AnalyzeTextResponse.model_validate(result.structured_content)
                                 ai = private_assessment(original, redactor)
                                 redactions |= original != ai
-                                for index, finding in enumerate(ai.indicators):
-                                    add_evidence(evidence, evidence_type="ai_content_indicator", source_component=name,
-                                                 finding=finding, severity="low",
-                                                 supporting_reference=f"ai_text_assessment.indicators[{index}]",
-                                                 limitations=["Unverified model finding; may reflect prompt injection or hallucination."])
+                                # Model findings remain in ai_text_assessment only.
+                                # They are hypotheses, not independently verified evidence.
+                                # Deterministic evidence and correlations must not
+                                # be strengthened by unsupported model assertions.
                         except (ValueError, TypeError, ValidationError):
                             errors.append(EmailError(code="invalid_tool_output", component=name, supporting_reference=reference))
         except Exception:

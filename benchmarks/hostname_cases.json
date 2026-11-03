@@ -1,0 +1,38 @@
+[
+  {
+    "id": "benign-01",
+    "origin": "https://example.com",
+    "expected_label": "benign",
+    "rationale": "Ordinary hostname."
+  },
+  {
+    "id": "benign-02",
+    "origin": "https://student-login.example",
+    "expected_label": "benign",
+    "rationale": "Authentication terminology alone is insufficient evidence."
+  },
+  {
+    "id": "benign-03",
+    "origin": "https://university-scholarship.example",
+    "expected_label": "benign",
+    "rationale": "Education-related terminology alone is insufficient evidence."
+  },
+  {
+    "id": "benign-04",
+    "origin": "https://a.b.c.d.example.com",
+    "expected_label": "benign",
+    "rationale": "Deep subdomains can be legitimate."
+  },
+  {
+    "id": "benign-05",
+    "origin": "https://xn--example.com",
+    "expected_label": "benign",
+    "rationale": "Punycode alone does not establish malicious activity."
+  },
+  {
+    "id": "review-01",
+    "origin": "https://xn--example.a.b.c.d.example.com",
+    "expected_label": "review",
+    "rationale": "Multiple unusual structural characteristics warrant investigation, not a phishing verdict."
+  }
+]
