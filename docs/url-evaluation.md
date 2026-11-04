@@ -1,3 +1,49 @@
+# Versioned benchmark evidence (V1 / V2 / V3)
+
+All evaluations use the **same unchanged deterministic URL-only analyzer** and warning threshold **SUS Score ≥ 60**. Scores are heuristic indicators, not calibrated fraud probabilities. Qwen, MCP, browsing, DNS and HTTP requests are not involved. All labels are constructed synthetic scenarios, **not verified fraud**. Case rationales may include sender/page context that the analyzer cannot observe.
+
+| Dataset | Cases | TP | TN | FP | FN | Accuracy | Precision | Recall | F1 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| V1 original baseline | 32 | 4 | 14 | 2 | 12 | 56.25% | 66.67% | 25.00% | 36.36% |
+| V2 repetitive-pattern stress test | 100 | 38 | 48 | 2 | 12 | 86.00% | 95.00% | 76.00% | 84.44% |
+| V3 challenge set | 100 | 4 | 48 | 2 | 46 | 52.00% | 66.67% | 8.00% | 14.29% |
+
+**These are not successive model improvements.** V2 appends 68 synthetic cases with repeated, easily recognized patterns; all 34 new suspicious cases trigger the same three indicators, inflating performance on that constructed distribution. V3 adds single-indicator and context-dependent suspicious cases, which the score-60 threshold misses. V3 is a deliberately challenging development/evaluation set, not a random or independently held-out sample. The datasets have different composition and do not establish population-level precision or recall. Neither tuning a threshold on V3 nor re-testing it on V3 establishes independent improvement.
+
+## Reproduce from repository root
+
+```bash
+.venv/bin/python -m benchmarks.evaluate_urls --version 1
+.venv/bin/python -m benchmarks.evaluate_urls --version 2
+.venv/bin/python -m benchmarks.evaluate_urls --version 3
+.venv/bin/python -m pytest -q tests/test_benchmark_versions.py
+```
+
+The original `.venv/bin/python -m benchmarks.evaluate_urls` still evaluates V1 and writes `benchmarks/results/url_evaluation.json`. Versioned results live in `benchmarks/results/url_evaluation_v{1,2,3}.json`; source datasets are `benchmarks/url_cases_v{1,2,3}.json`. The dashboard loads saved artifacts without running the analyzer, checks normalized dataset SHA-256, dataset sizes, case alignment and confusion counts. Each version records its correct `evaluation_version`. Re-running evaluation updates saved artifacts using current code; commit the code revision and datasets with evidence for reproducibility.
+
+## V3 threshold exploration (same saved scores, not a new model)
+
+| Threshold | Accuracy | Precision | Recall | F1 | FP | FN |
+| ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 15 | 52.00% | 51.47% | 70.00% | 59.32% | 33 | 15 |
+| 25 | 53.00% | 53.19% | 50.00% | 51.55% | 22 | 25 |
+| 30 | 44.00% | 41.67% | 30.00% | 34.88% | 21 | 35 |
+| 40 | 45.00% | 35.29% | 12.00% | 17.91% | 11 | 44 |
+| 45 | 44.00% | 31.25% | 10.00% | 15.15% | 11 | 45 |
+| 55 | 43.00% | 26.67% | 8.00% | 12.31% | 11 | 46 |
+| 60 | 52.00% | 66.67% | 8.00% | 14.29% | 2 | 46 |
+| 70 | 52.00% | 66.67% | 8.00% | 14.29% | 2 | 46 |
+
+The 60-point threshold is unchanged. Lowering it increases warnings but also raises false positives substantially; this exploratory comparison is **not** a policy recommendation. The heuristic adds 30 for IP hostname, 25 for `@` authority and 15 for `verify`/`urgent` path. The maximum observed/achievable score is 70 under current rules. Review-band scores below 60 count as negative only in this binary benchmark; they are not a declaration of safety. See the case-level dashboard for false-positive/false-negative rationales.
+
+## Provenance and limitations
+
+All three datasets use reserved documentation domains/IP ranges and must not be visited. The analyzer inspects URL syntax only; it cannot validate the sender, page contents, redirect behavior or real-world maliciousness. Balanced labels are artificial, not deployment prevalence. Synthetic metrics cannot be interpreted as real-world detection accuracy. The SHA-256 in each result is over normalized, validated JSON case data (not raw file bytes). Reproducibility requires the dataset, code revision, evaluation command and saved result. A representative independent labelled evaluation would be needed for performance claims.
+
+---
+
+## Original V1 methodology (retained)
+
 # Offline URL detector evaluation
 
 ## Purpose and scope

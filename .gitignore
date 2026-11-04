@@ -54,3 +54,7 @@ evidence/final-*.log
 
 # Evidence pending privacy review
 evidence/blocks3-4-verification.json
+
+# Local runtime event logs (privacy)
+/data/runtime.jsonl
+/data/runtime.jsonl.1

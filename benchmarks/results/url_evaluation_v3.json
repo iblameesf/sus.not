@@ -1,0 +1,1880 @@
+{
+  "evaluation_version": "3",
+  "dataset_sha256": "3baf319dd8c8eb86a3f93fcca88fee5f3ace30eea256a4ae94e9a961ed7e4b15",
+  "warning_threshold": 60,
+  "dataset_size": 100,
+  "label_caveat": "Synthetic scenario labels, not verified fraud or real-world accuracy.",
+  "metrics": {
+    "true_positives": 4,
+    "true_negatives": 48,
+    "false_positives": 2,
+    "false_negatives": 46,
+    "precision": 0.6666666666666666,
+    "recall": 0.08,
+    "f1_score": 0.14285714285714285,
+    "accuracy": 0.52
+  },
+  "cases": [
+    {
+      "id": "benign-01",
+      "url": "https://example.com/",
+      "expected_label": "benign",
+      "rationale": "Constructed ordinary homepage visit with no request for money or sensitive information.",
+      "sus_score": 0,
+      "risk_level": "low",
+      "indicators": [],
+      "predicted_label": "benign",
+      "outcome": "tn"
+    },
+    {
+      "id": "benign-02",
+      "url": "https://example.org/docs/start",
+      "expected_label": "benign",
+      "rationale": "Constructed public documentation link supplied in a trusted tutorial.",
+      "sus_score": 0,
+      "risk_level": "low",
+      "indicators": [],
+      "predicted_label": "benign",
+      "outcome": "tn"
+    },
+    {
+      "id": "benign-03",
+      "url": "https://example.net/products?category=books",
+      "expected_label": "benign",
+      "rationale": "Constructed ordinary catalogue navigation, not a payment solicitation.",
+      "sus_score": 0,
+      "risk_level": "low",
+      "indicators": [],
+      "predicted_label": "benign",
+      "outcome": "tn"
+    },
+    {
+      "id": "benign-04",
+      "url": "http://example.com/archive/2020",
+      "expected_label": "benign",
+      "rationale": "Constructed public historical archive with no login or confidential data.",
+      "sus_score": 0,
+      "risk_level": "low",
+      "indicators": [],
+      "predicted_label": "benign",
+      "outcome": "tn"
+    },
+    {
+      "id": "benign-05",
+      "url": "https://example.org/verify-email-help",
+      "expected_label": "benign",
+      "rationale": "Constructed help article explaining email verification; no credentials are requested.",
+      "sus_score": 15,
+      "risk_level": "low",
+      "indicators": [
+        "Path contains verify or urgent (+15)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "tn"
+    },
+    {
+      "id": "benign-06",
+      "url": "https://example.net/urgent-care-hours",
+      "expected_label": "benign",
+      "rationale": "Constructed clinic hours page; urgent describes care, not payment pressure.",
+      "sus_score": 15,
+      "risk_level": "low",
+      "indicators": [
+        "Path contains verify or urgent (+15)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "tn"
+    },
+    {
+      "id": "benign-07",
+      "url": "https://example.com/URGENT-weather-bulletin",
+      "expected_label": "benign",
+      "rationale": "Constructed public weather bulletin with no demand to act through a payment link.",
+      "sus_score": 15,
+      "risk_level": "low",
+      "indicators": [
+        "Path contains verify or urgent (+15)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "tn"
+    },
+    {
+      "id": "benign-08",
+      "url": "https://example.org/search?q=verify#urgent",
+      "expected_label": "benign",
+      "rationale": "Constructed documentation search and fragment navigation.",
+      "sus_score": 0,
+      "risk_level": "low",
+      "indicators": [],
+      "predicted_label": "benign",
+      "outcome": "tn"
+    },
+    {
+      "id": "benign-09",
+      "url": "https://reader@example.com/docs",
+      "expected_label": "benign",
+      "rationale": "Constructed legacy documentation URL with a non-secret username, intentionally supplied by its administrator.",
+      "sus_score": 25,
+      "risk_level": "low",
+      "indicators": [
+        "@ character in URL authority (+25)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "tn"
+    },
+    {
+      "id": "benign-10",
+      "url": "https://example.net:8443/status",
+      "expected_label": "benign",
+      "rationale": "Constructed administrator-provided status page on an alternate port.",
+      "sus_score": 0,
+      "risk_level": "low",
+      "indicators": [],
+      "predicted_label": "benign",
+      "outcome": "tn"
+    },
+    {
+      "id": "benign-11",
+      "url": "https://example.org/a%20b?lang=en#section-2",
+      "expected_label": "benign",
+      "rationale": "Constructed document whose title contains a space, with language and section selection.",
+      "sus_score": 0,
+      "risk_level": "low",
+      "indicators": [],
+      "predicted_label": "benign",
+      "outcome": "tn"
+    },
+    {
+      "id": "benign-12",
+      "url": "http://192.0.2.10/status",
+      "expected_label": "benign",
+      "rationale": "Constructed authorized lab appliance status page, represented by a documentation-only IP address.",
+      "sus_score": 30,
+      "risk_level": "review",
+      "indicators": [
+        "IP address used instead of a domain (+30)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "tn"
+    },
+    {
+      "id": "benign-13",
+      "url": "http://[2001:db8::10]/docs",
+      "expected_label": "benign",
+      "rationale": "Constructed authorized IPv6 lab documentation page using a reserved documentation address.",
+      "sus_score": 30,
+      "risk_level": "review",
+      "indicators": [
+        "IP address used instead of a domain (+30)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "tn"
+    },
+    {
+      "id": "benign-14",
+      "url": "https://example.com./reference",
+      "expected_label": "benign",
+      "rationale": "Constructed reference link using a fully qualified hostname with a trailing dot.",
+      "sus_score": 0,
+      "risk_level": "low",
+      "indicators": [],
+      "predicted_label": "benign",
+      "outcome": "tn"
+    },
+    {
+      "id": "benign-15",
+      "url": "http://operator@192.0.2.20/verify-status",
+      "expected_label": "benign",
+      "rationale": "Constructed authorized lab diagnostic: a named operator checks device status; no unsolicited credential or payment demand.",
+      "sus_score": 70,
+      "risk_level": "high",
+      "indicators": [
+        "IP address used instead of a domain (+30)",
+        "@ character in URL authority (+25)",
+        "Path contains verify or urgent (+15)"
+      ],
+      "predicted_label": "suspicious",
+      "outcome": "fp"
+    },
+    {
+      "id": "benign-16",
+      "url": "http://technician@[2001:db8::20]/urgent-maintenance",
+      "expected_label": "benign",
+      "rationale": "Constructed scheduled lab maintenance link distributed by its known administrator, not an impersonation or extortion scenario.",
+      "sus_score": 70,
+      "risk_level": "high",
+      "indicators": [
+        "IP address used instead of a domain (+30)",
+        "@ character in URL authority (+25)",
+        "Path contains verify or urgent (+15)"
+      ],
+      "predicted_label": "suspicious",
+      "outcome": "fp"
+    },
+    {
+      "id": "suspicious-01",
+      "url": "https://account.example@192.0.2.30/verify",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic scenario: an unsolicited account-closure message impersonates support and asks the recipient to enter a password at this link. Not verified fraud.",
+      "sus_score": 70,
+      "risk_level": "high",
+      "indicators": [
+        "IP address used instead of a domain (+30)",
+        "@ character in URL authority (+25)",
+        "Path contains verify or urgent (+15)"
+      ],
+      "predicted_label": "suspicious",
+      "outcome": "tp"
+    },
+    {
+      "id": "suspicious-02",
+      "url": "http://payroll.example@198.51.100.30/urgent",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic scenario: a sender impersonating payroll demands an immediate transfer to release wages. Not verified fraud.",
+      "sus_score": 70,
+      "risk_level": "high",
+      "indicators": [
+        "IP address used instead of a domain (+30)",
+        "@ character in URL authority (+25)",
+        "Path contains verify or urgent (+15)"
+      ],
+      "predicted_label": "suspicious",
+      "outcome": "tp"
+    },
+    {
+      "id": "suspicious-03",
+      "url": "https://delivery.example@203.0.113.30/verify-payment",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic scenario: an unexpected parcel message demands card details for a fabricated redelivery charge. Not verified fraud.",
+      "sus_score": 70,
+      "risk_level": "high",
+      "indicators": [
+        "IP address used instead of a domain (+30)",
+        "@ character in URL authority (+25)",
+        "Path contains verify or urgent (+15)"
+      ],
+      "predicted_label": "suspicious",
+      "outcome": "tp"
+    },
+    {
+      "id": "suspicious-04",
+      "url": "http://helpdesk.example@[2001:db8::30]/urgent-reset",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic scenario: an unsolicited helpdesk impersonator requests a password and MFA recovery codes. Not verified fraud.",
+      "sus_score": 70,
+      "risk_level": "high",
+      "indicators": [
+        "IP address used instead of a domain (+30)",
+        "@ character in URL authority (+25)",
+        "Path contains verify or urgent (+15)"
+      ],
+      "predicted_label": "suspicious",
+      "outcome": "tp"
+    },
+    {
+      "id": "suspicious-05",
+      "url": "https://account-recovery.example/login",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic scenario: a forged service notification asks for a password on a replacement login page. Not verified fraud; the URL alone cannot establish this context.",
+      "sus_score": 0,
+      "risk_level": "low",
+      "indicators": [],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "suspicious-06",
+      "url": "https://prize.example/claim",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic scenario: an unsolicited prize offer requires an advance fee before any winnings. Not verified fraud.",
+      "sus_score": 0,
+      "risk_level": "low",
+      "indicators": [],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "suspicious-07",
+      "url": "https://refund.example/card-details",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic scenario: a tax-office impersonator asks for full card details to issue an unexpected refund. Not verified fraud.",
+      "sus_score": 0,
+      "risk_level": "low",
+      "indicators": [],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "suspicious-08",
+      "url": "https://wallet.example/connect",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic scenario: a purported wallet support agent asks the recipient to submit a seed phrase. Not verified fraud.",
+      "sus_score": 0,
+      "risk_level": "low",
+      "indicators": [],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "suspicious-09",
+      "url": "https://example.com/redirect?to=https%3A%2F%2Fcredential-drop.example%2Flogin",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic scenario: an impersonation message conceals a credential-collection destination in a redirect parameter. No redirect behavior is claimed or tested; not verified fraud.",
+      "sus_score": 0,
+      "risk_level": "low",
+      "indicators": [],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "suspicious-10",
+      "url": "https://example.org/#submit-recovery-code",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic scenario: a forged support message instructs the recipient to submit a recovery code via the linked workflow. No page behavior is verified; not verified fraud.",
+      "sus_score": 0,
+      "risk_level": "low",
+      "indicators": [],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "suspicious-11",
+      "url": "https://bank.example/verify-session",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic scenario: an unsolicited bank impersonator threatens account suspension unless a password is submitted. Not verified fraud.",
+      "sus_score": 15,
+      "risk_level": "low",
+      "indicators": [
+        "Path contains verify or urgent (+15)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "suspicious-12",
+      "url": "https://fees.example/urgent-payment",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic scenario: a fake authority demands immediate payment under threat of arrest. Not verified fraud.",
+      "sus_score": 15,
+      "risk_level": "low",
+      "indicators": [
+        "Path contains verify or urgent (+15)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "suspicious-13",
+      "url": "http://198.51.100.40/login",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic scenario: a sender impersonates workplace IT and requests credentials on an unexpected replacement portal. Not verified fraud.",
+      "sus_score": 30,
+      "risk_level": "review",
+      "indicators": [
+        "IP address used instead of a domain (+30)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "suspicious-14",
+      "url": "https://accounts.example@collector.example/session",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic scenario: a forged account notice misrepresents the destination and asks for authentication codes. Not verified fraud.",
+      "sus_score": 25,
+      "risk_level": "low",
+      "indicators": [
+        "@ character in URL authority (+25)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "suspicious-15",
+      "url": "http://203.0.113.40/verify",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic scenario: a fake security agent asks for banking credentials to reverse a fabricated charge. Not verified fraud.",
+      "sus_score": 45,
+      "risk_level": "review",
+      "indicators": [
+        "IP address used instead of a domain (+30)",
+        "Path contains verify or urgent (+15)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "suspicious-16",
+      "url": "https://security.example@collector.example/urgent",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic scenario: an impersonated security team pressures the recipient to provide MFA codes. Not verified fraud.",
+      "sus_score": 40,
+      "risk_level": "review",
+      "indicators": [
+        "@ character in URL authority (+25)",
+        "Path contains verify or urgent (+15)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "v3-benign-01",
+      "url": "https://example.org/university/guide-0",
+      "expected_label": "benign",
+      "rationale": "Ordinary synthetic information page. URL structure alone does not prove safety.",
+      "sus_score": 0,
+      "risk_level": "low",
+      "indicators": [],
+      "predicted_label": "benign",
+      "outcome": "tn"
+    },
+    {
+      "id": "v3-benign-02",
+      "url": "https://example.org/internship/guide-1",
+      "expected_label": "benign",
+      "rationale": "Ordinary synthetic information page. URL structure alone does not prove safety.",
+      "sus_score": 0,
+      "risk_level": "low",
+      "indicators": [],
+      "predicted_label": "benign",
+      "outcome": "tn"
+    },
+    {
+      "id": "v3-benign-03",
+      "url": "https://example.org/scholarship/guide-2",
+      "expected_label": "benign",
+      "rationale": "Ordinary synthetic information page. URL structure alone does not prove safety.",
+      "sus_score": 0,
+      "risk_level": "low",
+      "indicators": [],
+      "predicted_label": "benign",
+      "outcome": "tn"
+    },
+    {
+      "id": "v3-benign-04",
+      "url": "https://example.org/housing/guide-3",
+      "expected_label": "benign",
+      "rationale": "Ordinary synthetic information page. URL structure alone does not prove safety.",
+      "sus_score": 0,
+      "risk_level": "low",
+      "indicators": [],
+      "predicted_label": "benign",
+      "outcome": "tn"
+    },
+    {
+      "id": "v3-benign-05",
+      "url": "https://example.org/admissions/guide-4",
+      "expected_label": "benign",
+      "rationale": "Ordinary synthetic information page. URL structure alone does not prove safety.",
+      "sus_score": 0,
+      "risk_level": "low",
+      "indicators": [],
+      "predicted_label": "benign",
+      "outcome": "tn"
+    },
+    {
+      "id": "v3-benign-06",
+      "url": "https://example.org/career/guide-5",
+      "expected_label": "benign",
+      "rationale": "Ordinary synthetic information page. URL structure alone does not prove safety.",
+      "sus_score": 0,
+      "risk_level": "low",
+      "indicators": [],
+      "predicted_label": "benign",
+      "outcome": "tn"
+    },
+    {
+      "id": "v3-benign-07",
+      "url": "https://example.org/student/guide-6",
+      "expected_label": "benign",
+      "rationale": "Ordinary synthetic information page. URL structure alone does not prove safety.",
+      "sus_score": 0,
+      "risk_level": "low",
+      "indicators": [],
+      "predicted_label": "benign",
+      "outcome": "tn"
+    },
+    {
+      "id": "v3-benign-08",
+      "url": "https://example.org/campus/guide-7",
+      "expected_label": "benign",
+      "rationale": "Ordinary synthetic information page. URL structure alone does not prove safety.",
+      "sus_score": 0,
+      "risk_level": "low",
+      "indicators": [],
+      "predicted_label": "benign",
+      "outcome": "tn"
+    },
+    {
+      "id": "v3-benign-09",
+      "url": "https://example.org/tuition/guide-8",
+      "expected_label": "benign",
+      "rationale": "Ordinary synthetic information page. URL structure alone does not prove safety.",
+      "sus_score": 0,
+      "risk_level": "low",
+      "indicators": [],
+      "predicted_label": "benign",
+      "outcome": "tn"
+    },
+    {
+      "id": "v3-benign-10",
+      "url": "https://example.org/library/verify-information-9",
+      "expected_label": "benign",
+      "rationale": "Legitimate synthetic verification-help page. URL structure alone does not prove safety.",
+      "sus_score": 15,
+      "risk_level": "low",
+      "indicators": [
+        "Path contains verify or urgent (+15)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "tn"
+    },
+    {
+      "id": "v3-benign-11",
+      "url": "https://example.org/research/verify-information-10",
+      "expected_label": "benign",
+      "rationale": "Legitimate synthetic verification-help page. URL structure alone does not prove safety.",
+      "sus_score": 15,
+      "risk_level": "low",
+      "indicators": [
+        "Path contains verify or urgent (+15)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "tn"
+    },
+    {
+      "id": "v3-benign-12",
+      "url": "https://example.org/transport/verify-information-11",
+      "expected_label": "benign",
+      "rationale": "Legitimate synthetic verification-help page. URL structure alone does not prove safety.",
+      "sus_score": 15,
+      "risk_level": "low",
+      "indicators": [
+        "Path contains verify or urgent (+15)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "tn"
+    },
+    {
+      "id": "v3-benign-13",
+      "url": "https://example.org/training/verify-information-12",
+      "expected_label": "benign",
+      "rationale": "Legitimate synthetic verification-help page. URL structure alone does not prove safety.",
+      "sus_score": 15,
+      "risk_level": "low",
+      "indicators": [
+        "Path contains verify or urgent (+15)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "tn"
+    },
+    {
+      "id": "v3-benign-14",
+      "url": "https://example.org/documents/verify-information-13",
+      "expected_label": "benign",
+      "rationale": "Legitimate synthetic verification-help page. URL structure alone does not prove safety.",
+      "sus_score": 15,
+      "risk_level": "low",
+      "indicators": [
+        "Path contains verify or urgent (+15)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "tn"
+    },
+    {
+      "id": "v3-benign-15",
+      "url": "https://example.org/application/verify-information-14",
+      "expected_label": "benign",
+      "rationale": "Legitimate synthetic verification-help page. URL structure alone does not prove safety.",
+      "sus_score": 15,
+      "risk_level": "low",
+      "indicators": [
+        "Path contains verify or urgent (+15)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "tn"
+    },
+    {
+      "id": "v3-benign-16",
+      "url": "https://example.org/support/verify-information-15",
+      "expected_label": "benign",
+      "rationale": "Legitimate synthetic verification-help page. URL structure alone does not prove safety.",
+      "sus_score": 15,
+      "risk_level": "low",
+      "indicators": [
+        "Path contains verify or urgent (+15)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "tn"
+    },
+    {
+      "id": "v3-benign-17",
+      "url": "https://example.org/accommodation/verify-information-16",
+      "expected_label": "benign",
+      "rationale": "Legitimate synthetic verification-help page. URL structure alone does not prove safety.",
+      "sus_score": 15,
+      "risk_level": "low",
+      "indicators": [
+        "Path contains verify or urgent (+15)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "tn"
+    },
+    {
+      "id": "v3-benign-18",
+      "url": "http://192.0.2.27/university/status",
+      "expected_label": "benign",
+      "rationale": "Authorized synthetic internal laboratory diagnostic. URL structure alone does not prove safety.",
+      "sus_score": 30,
+      "risk_level": "review",
+      "indicators": [
+        "IP address used instead of a domain (+30)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "tn"
+    },
+    {
+      "id": "v3-benign-19",
+      "url": "http://192.0.2.28/internship/status",
+      "expected_label": "benign",
+      "rationale": "Authorized synthetic internal laboratory diagnostic. URL structure alone does not prove safety.",
+      "sus_score": 30,
+      "risk_level": "review",
+      "indicators": [
+        "IP address used instead of a domain (+30)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "tn"
+    },
+    {
+      "id": "v3-benign-20",
+      "url": "http://192.0.2.29/scholarship/status",
+      "expected_label": "benign",
+      "rationale": "Authorized synthetic internal laboratory diagnostic. URL structure alone does not prove safety.",
+      "sus_score": 30,
+      "risk_level": "review",
+      "indicators": [
+        "IP address used instead of a domain (+30)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "tn"
+    },
+    {
+      "id": "v3-benign-21",
+      "url": "http://192.0.2.30/housing/status",
+      "expected_label": "benign",
+      "rationale": "Authorized synthetic internal laboratory diagnostic. URL structure alone does not prove safety.",
+      "sus_score": 30,
+      "risk_level": "review",
+      "indicators": [
+        "IP address used instead of a domain (+30)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "tn"
+    },
+    {
+      "id": "v3-benign-22",
+      "url": "http://192.0.2.31/admissions/status",
+      "expected_label": "benign",
+      "rationale": "Authorized synthetic internal laboratory diagnostic. URL structure alone does not prove safety.",
+      "sus_score": 30,
+      "risk_level": "review",
+      "indicators": [
+        "IP address used instead of a domain (+30)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "tn"
+    },
+    {
+      "id": "v3-benign-23",
+      "url": "http://192.0.2.32/career/status",
+      "expected_label": "benign",
+      "rationale": "Authorized synthetic internal laboratory diagnostic. URL structure alone does not prove safety.",
+      "sus_score": 30,
+      "risk_level": "review",
+      "indicators": [
+        "IP address used instead of a domain (+30)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "tn"
+    },
+    {
+      "id": "v3-benign-24",
+      "url": "http://192.0.2.33/student/status",
+      "expected_label": "benign",
+      "rationale": "Authorized synthetic internal laboratory diagnostic. URL structure alone does not prove safety.",
+      "sus_score": 30,
+      "risk_level": "review",
+      "indicators": [
+        "IP address used instead of a domain (+30)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "tn"
+    },
+    {
+      "id": "v3-benign-25",
+      "url": "http://192.0.2.34/campus/status",
+      "expected_label": "benign",
+      "rationale": "Authorized synthetic internal laboratory diagnostic. URL structure alone does not prove safety.",
+      "sus_score": 30,
+      "risk_level": "review",
+      "indicators": [
+        "IP address used instead of a domain (+30)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "tn"
+    },
+    {
+      "id": "v3-benign-26",
+      "url": "https://operator@192.0.2.35/tuition/maintenance",
+      "expected_label": "benign",
+      "rationale": "Authorized synthetic administrator maintenance URL. URL structure alone does not prove safety.",
+      "sus_score": 55,
+      "risk_level": "review",
+      "indicators": [
+        "IP address used instead of a domain (+30)",
+        "@ character in URL authority (+25)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "tn"
+    },
+    {
+      "id": "v3-benign-27",
+      "url": "https://operator@192.0.2.36/library/maintenance",
+      "expected_label": "benign",
+      "rationale": "Authorized synthetic administrator maintenance URL. URL structure alone does not prove safety.",
+      "sus_score": 55,
+      "risk_level": "review",
+      "indicators": [
+        "IP address used instead of a domain (+30)",
+        "@ character in URL authority (+25)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "tn"
+    },
+    {
+      "id": "v3-benign-28",
+      "url": "https://operator@192.0.2.37/research/maintenance",
+      "expected_label": "benign",
+      "rationale": "Authorized synthetic administrator maintenance URL. URL structure alone does not prove safety.",
+      "sus_score": 55,
+      "risk_level": "review",
+      "indicators": [
+        "IP address used instead of a domain (+30)",
+        "@ character in URL authority (+25)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "tn"
+    },
+    {
+      "id": "v3-benign-29",
+      "url": "https://operator@192.0.2.38/transport/maintenance",
+      "expected_label": "benign",
+      "rationale": "Authorized synthetic administrator maintenance URL. URL structure alone does not prove safety.",
+      "sus_score": 55,
+      "risk_level": "review",
+      "indicators": [
+        "IP address used instead of a domain (+30)",
+        "@ character in URL authority (+25)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "tn"
+    },
+    {
+      "id": "v3-benign-30",
+      "url": "https://operator@192.0.2.39/training/maintenance",
+      "expected_label": "benign",
+      "rationale": "Authorized synthetic administrator maintenance URL. URL structure alone does not prove safety.",
+      "sus_score": 55,
+      "risk_level": "review",
+      "indicators": [
+        "IP address used instead of a domain (+30)",
+        "@ character in URL authority (+25)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "tn"
+    },
+    {
+      "id": "v3-benign-31",
+      "url": "https://operator@192.0.2.40/documents/maintenance",
+      "expected_label": "benign",
+      "rationale": "Authorized synthetic administrator maintenance URL. URL structure alone does not prove safety.",
+      "sus_score": 55,
+      "risk_level": "review",
+      "indicators": [
+        "IP address used instead of a domain (+30)",
+        "@ character in URL authority (+25)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "tn"
+    },
+    {
+      "id": "v3-benign-32",
+      "url": "https://operator@192.0.2.41/application/maintenance",
+      "expected_label": "benign",
+      "rationale": "Authorized synthetic administrator maintenance URL. URL structure alone does not prove safety.",
+      "sus_score": 55,
+      "risk_level": "review",
+      "indicators": [
+        "IP address used instead of a domain (+30)",
+        "@ character in URL authority (+25)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "tn"
+    },
+    {
+      "id": "v3-benign-33",
+      "url": "https://operator@192.0.2.42/support/maintenance",
+      "expected_label": "benign",
+      "rationale": "Authorized synthetic administrator maintenance URL. URL structure alone does not prove safety.",
+      "sus_score": 55,
+      "risk_level": "review",
+      "indicators": [
+        "IP address used instead of a domain (+30)",
+        "@ character in URL authority (+25)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "tn"
+    },
+    {
+      "id": "v3-benign-34",
+      "url": "https://operator@192.0.2.43/accommodation/maintenance",
+      "expected_label": "benign",
+      "rationale": "Authorized synthetic administrator maintenance URL. URL structure alone does not prove safety.",
+      "sus_score": 55,
+      "risk_level": "review",
+      "indicators": [
+        "IP address used instead of a domain (+30)",
+        "@ character in URL authority (+25)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "tn"
+    },
+    {
+      "id": "v3-suspicious-01",
+      "url": "https://university-account.example/login-0",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic impersonation scenario requiring message context. Constructed scenario, not verified fraud.",
+      "sus_score": 0,
+      "risk_level": "low",
+      "indicators": [],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "v3-suspicious-02",
+      "url": "https://internship-account.example/login-1",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic impersonation scenario requiring message context. Constructed scenario, not verified fraud.",
+      "sus_score": 0,
+      "risk_level": "low",
+      "indicators": [],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "v3-suspicious-03",
+      "url": "https://scholarship-account.example/login-2",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic impersonation scenario requiring message context. Constructed scenario, not verified fraud.",
+      "sus_score": 0,
+      "risk_level": "low",
+      "indicators": [],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "v3-suspicious-04",
+      "url": "https://housing-account.example/login-3",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic impersonation scenario requiring message context. Constructed scenario, not verified fraud.",
+      "sus_score": 0,
+      "risk_level": "low",
+      "indicators": [],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "v3-suspicious-05",
+      "url": "https://admissions-account.example/login-4",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic impersonation scenario requiring message context. Constructed scenario, not verified fraud.",
+      "sus_score": 0,
+      "risk_level": "low",
+      "indicators": [],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "v3-suspicious-06",
+      "url": "https://career-account.example/login-5",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic impersonation scenario requiring message context. Constructed scenario, not verified fraud.",
+      "sus_score": 0,
+      "risk_level": "low",
+      "indicators": [],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "v3-suspicious-07",
+      "url": "https://student-account.example/login-6",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic impersonation scenario requiring message context. Constructed scenario, not verified fraud.",
+      "sus_score": 0,
+      "risk_level": "low",
+      "indicators": [],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "v3-suspicious-08",
+      "url": "https://campus-account.example/login-7",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic impersonation scenario requiring message context. Constructed scenario, not verified fraud.",
+      "sus_score": 0,
+      "risk_level": "low",
+      "indicators": [],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "v3-suspicious-09",
+      "url": "https://tuition-account.example/login-8",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic impersonation scenario requiring message context. Constructed scenario, not verified fraud.",
+      "sus_score": 0,
+      "risk_level": "low",
+      "indicators": [],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "v3-suspicious-10",
+      "url": "https://library.example/urgent-check-9",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic urgent credential-request scenario. Constructed scenario, not verified fraud.",
+      "sus_score": 15,
+      "risk_level": "low",
+      "indicators": [
+        "Path contains verify or urgent (+15)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "v3-suspicious-11",
+      "url": "https://research.example/urgent-check-10",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic urgent credential-request scenario. Constructed scenario, not verified fraud.",
+      "sus_score": 15,
+      "risk_level": "low",
+      "indicators": [
+        "Path contains verify or urgent (+15)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "v3-suspicious-12",
+      "url": "https://transport.example/urgent-check-11",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic urgent credential-request scenario. Constructed scenario, not verified fraud.",
+      "sus_score": 15,
+      "risk_level": "low",
+      "indicators": [
+        "Path contains verify or urgent (+15)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "v3-suspicious-13",
+      "url": "https://training.example/urgent-check-12",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic urgent credential-request scenario. Constructed scenario, not verified fraud.",
+      "sus_score": 15,
+      "risk_level": "low",
+      "indicators": [
+        "Path contains verify or urgent (+15)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "v3-suspicious-14",
+      "url": "https://documents.example/urgent-check-13",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic urgent credential-request scenario. Constructed scenario, not verified fraud.",
+      "sus_score": 15,
+      "risk_level": "low",
+      "indicators": [
+        "Path contains verify or urgent (+15)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "v3-suspicious-15",
+      "url": "https://application.example/urgent-check-14",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic urgent credential-request scenario. Constructed scenario, not verified fraud.",
+      "sus_score": 15,
+      "risk_level": "low",
+      "indicators": [
+        "Path contains verify or urgent (+15)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "v3-suspicious-16",
+      "url": "https://support.example/urgent-check-15",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic urgent credential-request scenario. Constructed scenario, not verified fraud.",
+      "sus_score": 15,
+      "risk_level": "low",
+      "indicators": [
+        "Path contains verify or urgent (+15)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "v3-suspicious-17",
+      "url": "https://accommodation.example/urgent-check-16",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic urgent credential-request scenario. Constructed scenario, not verified fraud.",
+      "sus_score": 15,
+      "risk_level": "low",
+      "indicators": [
+        "Path contains verify or urgent (+15)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "v3-suspicious-18",
+      "url": "http://198.51.100.27/university/login",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic impersonation using an IP-address destination. Constructed scenario, not verified fraud.",
+      "sus_score": 30,
+      "risk_level": "review",
+      "indicators": [
+        "IP address used instead of a domain (+30)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "v3-suspicious-19",
+      "url": "http://198.51.100.28/internship/login",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic impersonation using an IP-address destination. Constructed scenario, not verified fraud.",
+      "sus_score": 30,
+      "risk_level": "review",
+      "indicators": [
+        "IP address used instead of a domain (+30)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "v3-suspicious-20",
+      "url": "http://198.51.100.29/scholarship/login",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic impersonation using an IP-address destination. Constructed scenario, not verified fraud.",
+      "sus_score": 30,
+      "risk_level": "review",
+      "indicators": [
+        "IP address used instead of a domain (+30)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "v3-suspicious-21",
+      "url": "http://198.51.100.30/housing/login",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic impersonation using an IP-address destination. Constructed scenario, not verified fraud.",
+      "sus_score": 30,
+      "risk_level": "review",
+      "indicators": [
+        "IP address used instead of a domain (+30)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "v3-suspicious-22",
+      "url": "http://198.51.100.31/admissions/login",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic impersonation using an IP-address destination. Constructed scenario, not verified fraud.",
+      "sus_score": 30,
+      "risk_level": "review",
+      "indicators": [
+        "IP address used instead of a domain (+30)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "v3-suspicious-23",
+      "url": "http://198.51.100.32/career/login",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic impersonation using an IP-address destination. Constructed scenario, not verified fraud.",
+      "sus_score": 30,
+      "risk_level": "review",
+      "indicators": [
+        "IP address used instead of a domain (+30)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "v3-suspicious-24",
+      "url": "http://198.51.100.33/student/login",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic impersonation using an IP-address destination. Constructed scenario, not verified fraud.",
+      "sus_score": 30,
+      "risk_level": "review",
+      "indicators": [
+        "IP address used instead of a domain (+30)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "v3-suspicious-25",
+      "url": "http://198.51.100.34/campus/login",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic impersonation using an IP-address destination. Constructed scenario, not verified fraud.",
+      "sus_score": 30,
+      "risk_level": "review",
+      "indicators": [
+        "IP address used instead of a domain (+30)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "v3-suspicious-26",
+      "url": "https://tuition-portal.example@collector.example/session-25",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic misleading authority text before @. Constructed scenario, not verified fraud.",
+      "sus_score": 25,
+      "risk_level": "low",
+      "indicators": [
+        "@ character in URL authority (+25)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "v3-suspicious-27",
+      "url": "https://library-portal.example@collector.example/session-26",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic misleading authority text before @. Constructed scenario, not verified fraud.",
+      "sus_score": 25,
+      "risk_level": "low",
+      "indicators": [
+        "@ character in URL authority (+25)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "v3-suspicious-28",
+      "url": "https://research-portal.example@collector.example/session-27",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic misleading authority text before @. Constructed scenario, not verified fraud.",
+      "sus_score": 25,
+      "risk_level": "low",
+      "indicators": [
+        "@ character in URL authority (+25)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "v3-suspicious-29",
+      "url": "https://transport-portal.example@collector.example/session-28",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic misleading authority text before @. Constructed scenario, not verified fraud.",
+      "sus_score": 25,
+      "risk_level": "low",
+      "indicators": [
+        "@ character in URL authority (+25)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "v3-suspicious-30",
+      "url": "https://training-portal.example@collector.example/session-29",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic misleading authority text before @. Constructed scenario, not verified fraud.",
+      "sus_score": 25,
+      "risk_level": "low",
+      "indicators": [
+        "@ character in URL authority (+25)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "v3-suspicious-31",
+      "url": "https://documents-portal.example@collector.example/session-30",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic misleading authority text before @. Constructed scenario, not verified fraud.",
+      "sus_score": 25,
+      "risk_level": "low",
+      "indicators": [
+        "@ character in URL authority (+25)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "v3-suspicious-32",
+      "url": "https://application-portal.example@collector.example/session-31",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic misleading authority text before @. Constructed scenario, not verified fraud.",
+      "sus_score": 25,
+      "risk_level": "low",
+      "indicators": [
+        "@ character in URL authority (+25)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "v3-suspicious-33",
+      "url": "https://support-portal.example@collector.example/session-32",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic misleading authority text before @. Constructed scenario, not verified fraud.",
+      "sus_score": 25,
+      "risk_level": "low",
+      "indicators": [
+        "@ character in URL authority (+25)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "v3-suspicious-34",
+      "url": "https://accommodation-portal.example@collector.example/session-33",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic misleading authority text before @. Constructed scenario, not verified fraud.",
+      "sus_score": 25,
+      "risk_level": "low",
+      "indicators": [
+        "@ character in URL authority (+25)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    }
+  ],
+  "misclassified_cases": [
+    {
+      "id": "benign-15",
+      "url": "http://operator@192.0.2.20/verify-status",
+      "expected_label": "benign",
+      "rationale": "Constructed authorized lab diagnostic: a named operator checks device status; no unsolicited credential or payment demand.",
+      "sus_score": 70,
+      "risk_level": "high",
+      "indicators": [
+        "IP address used instead of a domain (+30)",
+        "@ character in URL authority (+25)",
+        "Path contains verify or urgent (+15)"
+      ],
+      "predicted_label": "suspicious",
+      "outcome": "fp"
+    },
+    {
+      "id": "benign-16",
+      "url": "http://technician@[2001:db8::20]/urgent-maintenance",
+      "expected_label": "benign",
+      "rationale": "Constructed scheduled lab maintenance link distributed by its known administrator, not an impersonation or extortion scenario.",
+      "sus_score": 70,
+      "risk_level": "high",
+      "indicators": [
+        "IP address used instead of a domain (+30)",
+        "@ character in URL authority (+25)",
+        "Path contains verify or urgent (+15)"
+      ],
+      "predicted_label": "suspicious",
+      "outcome": "fp"
+    },
+    {
+      "id": "suspicious-05",
+      "url": "https://account-recovery.example/login",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic scenario: a forged service notification asks for a password on a replacement login page. Not verified fraud; the URL alone cannot establish this context.",
+      "sus_score": 0,
+      "risk_level": "low",
+      "indicators": [],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "suspicious-06",
+      "url": "https://prize.example/claim",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic scenario: an unsolicited prize offer requires an advance fee before any winnings. Not verified fraud.",
+      "sus_score": 0,
+      "risk_level": "low",
+      "indicators": [],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "suspicious-07",
+      "url": "https://refund.example/card-details",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic scenario: a tax-office impersonator asks for full card details to issue an unexpected refund. Not verified fraud.",
+      "sus_score": 0,
+      "risk_level": "low",
+      "indicators": [],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "suspicious-08",
+      "url": "https://wallet.example/connect",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic scenario: a purported wallet support agent asks the recipient to submit a seed phrase. Not verified fraud.",
+      "sus_score": 0,
+      "risk_level": "low",
+      "indicators": [],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "suspicious-09",
+      "url": "https://example.com/redirect?to=https%3A%2F%2Fcredential-drop.example%2Flogin",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic scenario: an impersonation message conceals a credential-collection destination in a redirect parameter. No redirect behavior is claimed or tested; not verified fraud.",
+      "sus_score": 0,
+      "risk_level": "low",
+      "indicators": [],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "suspicious-10",
+      "url": "https://example.org/#submit-recovery-code",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic scenario: a forged support message instructs the recipient to submit a recovery code via the linked workflow. No page behavior is verified; not verified fraud.",
+      "sus_score": 0,
+      "risk_level": "low",
+      "indicators": [],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "suspicious-11",
+      "url": "https://bank.example/verify-session",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic scenario: an unsolicited bank impersonator threatens account suspension unless a password is submitted. Not verified fraud.",
+      "sus_score": 15,
+      "risk_level": "low",
+      "indicators": [
+        "Path contains verify or urgent (+15)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "suspicious-12",
+      "url": "https://fees.example/urgent-payment",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic scenario: a fake authority demands immediate payment under threat of arrest. Not verified fraud.",
+      "sus_score": 15,
+      "risk_level": "low",
+      "indicators": [
+        "Path contains verify or urgent (+15)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "suspicious-13",
+      "url": "http://198.51.100.40/login",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic scenario: a sender impersonates workplace IT and requests credentials on an unexpected replacement portal. Not verified fraud.",
+      "sus_score": 30,
+      "risk_level": "review",
+      "indicators": [
+        "IP address used instead of a domain (+30)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "suspicious-14",
+      "url": "https://accounts.example@collector.example/session",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic scenario: a forged account notice misrepresents the destination and asks for authentication codes. Not verified fraud.",
+      "sus_score": 25,
+      "risk_level": "low",
+      "indicators": [
+        "@ character in URL authority (+25)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "suspicious-15",
+      "url": "http://203.0.113.40/verify",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic scenario: a fake security agent asks for banking credentials to reverse a fabricated charge. Not verified fraud.",
+      "sus_score": 45,
+      "risk_level": "review",
+      "indicators": [
+        "IP address used instead of a domain (+30)",
+        "Path contains verify or urgent (+15)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "suspicious-16",
+      "url": "https://security.example@collector.example/urgent",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic scenario: an impersonated security team pressures the recipient to provide MFA codes. Not verified fraud.",
+      "sus_score": 40,
+      "risk_level": "review",
+      "indicators": [
+        "@ character in URL authority (+25)",
+        "Path contains verify or urgent (+15)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "v3-suspicious-01",
+      "url": "https://university-account.example/login-0",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic impersonation scenario requiring message context. Constructed scenario, not verified fraud.",
+      "sus_score": 0,
+      "risk_level": "low",
+      "indicators": [],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "v3-suspicious-02",
+      "url": "https://internship-account.example/login-1",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic impersonation scenario requiring message context. Constructed scenario, not verified fraud.",
+      "sus_score": 0,
+      "risk_level": "low",
+      "indicators": [],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "v3-suspicious-03",
+      "url": "https://scholarship-account.example/login-2",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic impersonation scenario requiring message context. Constructed scenario, not verified fraud.",
+      "sus_score": 0,
+      "risk_level": "low",
+      "indicators": [],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "v3-suspicious-04",
+      "url": "https://housing-account.example/login-3",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic impersonation scenario requiring message context. Constructed scenario, not verified fraud.",
+      "sus_score": 0,
+      "risk_level": "low",
+      "indicators": [],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "v3-suspicious-05",
+      "url": "https://admissions-account.example/login-4",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic impersonation scenario requiring message context. Constructed scenario, not verified fraud.",
+      "sus_score": 0,
+      "risk_level": "low",
+      "indicators": [],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "v3-suspicious-06",
+      "url": "https://career-account.example/login-5",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic impersonation scenario requiring message context. Constructed scenario, not verified fraud.",
+      "sus_score": 0,
+      "risk_level": "low",
+      "indicators": [],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "v3-suspicious-07",
+      "url": "https://student-account.example/login-6",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic impersonation scenario requiring message context. Constructed scenario, not verified fraud.",
+      "sus_score": 0,
+      "risk_level": "low",
+      "indicators": [],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "v3-suspicious-08",
+      "url": "https://campus-account.example/login-7",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic impersonation scenario requiring message context. Constructed scenario, not verified fraud.",
+      "sus_score": 0,
+      "risk_level": "low",
+      "indicators": [],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "v3-suspicious-09",
+      "url": "https://tuition-account.example/login-8",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic impersonation scenario requiring message context. Constructed scenario, not verified fraud.",
+      "sus_score": 0,
+      "risk_level": "low",
+      "indicators": [],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "v3-suspicious-10",
+      "url": "https://library.example/urgent-check-9",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic urgent credential-request scenario. Constructed scenario, not verified fraud.",
+      "sus_score": 15,
+      "risk_level": "low",
+      "indicators": [
+        "Path contains verify or urgent (+15)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "v3-suspicious-11",
+      "url": "https://research.example/urgent-check-10",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic urgent credential-request scenario. Constructed scenario, not verified fraud.",
+      "sus_score": 15,
+      "risk_level": "low",
+      "indicators": [
+        "Path contains verify or urgent (+15)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "v3-suspicious-12",
+      "url": "https://transport.example/urgent-check-11",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic urgent credential-request scenario. Constructed scenario, not verified fraud.",
+      "sus_score": 15,
+      "risk_level": "low",
+      "indicators": [
+        "Path contains verify or urgent (+15)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "v3-suspicious-13",
+      "url": "https://training.example/urgent-check-12",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic urgent credential-request scenario. Constructed scenario, not verified fraud.",
+      "sus_score": 15,
+      "risk_level": "low",
+      "indicators": [
+        "Path contains verify or urgent (+15)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "v3-suspicious-14",
+      "url": "https://documents.example/urgent-check-13",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic urgent credential-request scenario. Constructed scenario, not verified fraud.",
+      "sus_score": 15,
+      "risk_level": "low",
+      "indicators": [
+        "Path contains verify or urgent (+15)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "v3-suspicious-15",
+      "url": "https://application.example/urgent-check-14",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic urgent credential-request scenario. Constructed scenario, not verified fraud.",
+      "sus_score": 15,
+      "risk_level": "low",
+      "indicators": [
+        "Path contains verify or urgent (+15)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "v3-suspicious-16",
+      "url": "https://support.example/urgent-check-15",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic urgent credential-request scenario. Constructed scenario, not verified fraud.",
+      "sus_score": 15,
+      "risk_level": "low",
+      "indicators": [
+        "Path contains verify or urgent (+15)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "v3-suspicious-17",
+      "url": "https://accommodation.example/urgent-check-16",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic urgent credential-request scenario. Constructed scenario, not verified fraud.",
+      "sus_score": 15,
+      "risk_level": "low",
+      "indicators": [
+        "Path contains verify or urgent (+15)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "v3-suspicious-18",
+      "url": "http://198.51.100.27/university/login",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic impersonation using an IP-address destination. Constructed scenario, not verified fraud.",
+      "sus_score": 30,
+      "risk_level": "review",
+      "indicators": [
+        "IP address used instead of a domain (+30)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "v3-suspicious-19",
+      "url": "http://198.51.100.28/internship/login",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic impersonation using an IP-address destination. Constructed scenario, not verified fraud.",
+      "sus_score": 30,
+      "risk_level": "review",
+      "indicators": [
+        "IP address used instead of a domain (+30)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "v3-suspicious-20",
+      "url": "http://198.51.100.29/scholarship/login",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic impersonation using an IP-address destination. Constructed scenario, not verified fraud.",
+      "sus_score": 30,
+      "risk_level": "review",
+      "indicators": [
+        "IP address used instead of a domain (+30)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "v3-suspicious-21",
+      "url": "http://198.51.100.30/housing/login",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic impersonation using an IP-address destination. Constructed scenario, not verified fraud.",
+      "sus_score": 30,
+      "risk_level": "review",
+      "indicators": [
+        "IP address used instead of a domain (+30)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "v3-suspicious-22",
+      "url": "http://198.51.100.31/admissions/login",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic impersonation using an IP-address destination. Constructed scenario, not verified fraud.",
+      "sus_score": 30,
+      "risk_level": "review",
+      "indicators": [
+        "IP address used instead of a domain (+30)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "v3-suspicious-23",
+      "url": "http://198.51.100.32/career/login",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic impersonation using an IP-address destination. Constructed scenario, not verified fraud.",
+      "sus_score": 30,
+      "risk_level": "review",
+      "indicators": [
+        "IP address used instead of a domain (+30)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "v3-suspicious-24",
+      "url": "http://198.51.100.33/student/login",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic impersonation using an IP-address destination. Constructed scenario, not verified fraud.",
+      "sus_score": 30,
+      "risk_level": "review",
+      "indicators": [
+        "IP address used instead of a domain (+30)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "v3-suspicious-25",
+      "url": "http://198.51.100.34/campus/login",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic impersonation using an IP-address destination. Constructed scenario, not verified fraud.",
+      "sus_score": 30,
+      "risk_level": "review",
+      "indicators": [
+        "IP address used instead of a domain (+30)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "v3-suspicious-26",
+      "url": "https://tuition-portal.example@collector.example/session-25",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic misleading authority text before @. Constructed scenario, not verified fraud.",
+      "sus_score": 25,
+      "risk_level": "low",
+      "indicators": [
+        "@ character in URL authority (+25)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "v3-suspicious-27",
+      "url": "https://library-portal.example@collector.example/session-26",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic misleading authority text before @. Constructed scenario, not verified fraud.",
+      "sus_score": 25,
+      "risk_level": "low",
+      "indicators": [
+        "@ character in URL authority (+25)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "v3-suspicious-28",
+      "url": "https://research-portal.example@collector.example/session-27",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic misleading authority text before @. Constructed scenario, not verified fraud.",
+      "sus_score": 25,
+      "risk_level": "low",
+      "indicators": [
+        "@ character in URL authority (+25)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "v3-suspicious-29",
+      "url": "https://transport-portal.example@collector.example/session-28",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic misleading authority text before @. Constructed scenario, not verified fraud.",
+      "sus_score": 25,
+      "risk_level": "low",
+      "indicators": [
+        "@ character in URL authority (+25)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "v3-suspicious-30",
+      "url": "https://training-portal.example@collector.example/session-29",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic misleading authority text before @. Constructed scenario, not verified fraud.",
+      "sus_score": 25,
+      "risk_level": "low",
+      "indicators": [
+        "@ character in URL authority (+25)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "v3-suspicious-31",
+      "url": "https://documents-portal.example@collector.example/session-30",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic misleading authority text before @. Constructed scenario, not verified fraud.",
+      "sus_score": 25,
+      "risk_level": "low",
+      "indicators": [
+        "@ character in URL authority (+25)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "v3-suspicious-32",
+      "url": "https://application-portal.example@collector.example/session-31",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic misleading authority text before @. Constructed scenario, not verified fraud.",
+      "sus_score": 25,
+      "risk_level": "low",
+      "indicators": [
+        "@ character in URL authority (+25)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "v3-suspicious-33",
+      "url": "https://support-portal.example@collector.example/session-32",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic misleading authority text before @. Constructed scenario, not verified fraud.",
+      "sus_score": 25,
+      "risk_level": "low",
+      "indicators": [
+        "@ character in URL authority (+25)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    },
+    {
+      "id": "v3-suspicious-34",
+      "url": "https://accommodation-portal.example@collector.example/session-33",
+      "expected_label": "suspicious",
+      "rationale": "Synthetic misleading authority text before @. Constructed scenario, not verified fraud.",
+      "sus_score": 25,
+      "risk_level": "low",
+      "indicators": [
+        "@ character in URL authority (+25)"
+      ],
+      "predicted_label": "benign",
+      "outcome": "fn"
+    }
+  ]
+}

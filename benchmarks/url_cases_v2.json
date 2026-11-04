@@ -1,0 +1,602 @@
+[
+  {
+    "id": "benign-01",
+    "url": "https://example.com/",
+    "expected_label": "benign",
+    "rationale": "Constructed ordinary homepage visit with no request for money or sensitive information."
+  },
+  {
+    "id": "benign-02",
+    "url": "https://example.org/docs/start",
+    "expected_label": "benign",
+    "rationale": "Constructed public documentation link supplied in a trusted tutorial."
+  },
+  {
+    "id": "benign-03",
+    "url": "https://example.net/products?category=books",
+    "expected_label": "benign",
+    "rationale": "Constructed ordinary catalogue navigation, not a payment solicitation."
+  },
+  {
+    "id": "benign-04",
+    "url": "http://example.com/archive/2020",
+    "expected_label": "benign",
+    "rationale": "Constructed public historical archive with no login or confidential data."
+  },
+  {
+    "id": "benign-05",
+    "url": "https://example.org/verify-email-help",
+    "expected_label": "benign",
+    "rationale": "Constructed help article explaining email verification; no credentials are requested."
+  },
+  {
+    "id": "benign-06",
+    "url": "https://example.net/urgent-care-hours",
+    "expected_label": "benign",
+    "rationale": "Constructed clinic hours page; urgent describes care, not payment pressure."
+  },
+  {
+    "id": "benign-07",
+    "url": "https://example.com/URGENT-weather-bulletin",
+    "expected_label": "benign",
+    "rationale": "Constructed public weather bulletin with no demand to act through a payment link."
+  },
+  {
+    "id": "benign-08",
+    "url": "https://example.org/search?q=verify#urgent",
+    "expected_label": "benign",
+    "rationale": "Constructed documentation search and fragment navigation."
+  },
+  {
+    "id": "benign-09",
+    "url": "https://reader@example.com/docs",
+    "expected_label": "benign",
+    "rationale": "Constructed legacy documentation URL with a non-secret username, intentionally supplied by its administrator."
+  },
+  {
+    "id": "benign-10",
+    "url": "https://example.net:8443/status",
+    "expected_label": "benign",
+    "rationale": "Constructed administrator-provided status page on an alternate port."
+  },
+  {
+    "id": "benign-11",
+    "url": "https://example.org/a%20b?lang=en#section-2",
+    "expected_label": "benign",
+    "rationale": "Constructed document whose title contains a space, with language and section selection."
+  },
+  {
+    "id": "benign-12",
+    "url": "http://192.0.2.10/status",
+    "expected_label": "benign",
+    "rationale": "Constructed authorized lab appliance status page, represented by a documentation-only IP address."
+  },
+  {
+    "id": "benign-13",
+    "url": "http://[2001:db8::10]/docs",
+    "expected_label": "benign",
+    "rationale": "Constructed authorized IPv6 lab documentation page using a reserved documentation address."
+  },
+  {
+    "id": "benign-14",
+    "url": "https://example.com./reference",
+    "expected_label": "benign",
+    "rationale": "Constructed reference link using a fully qualified hostname with a trailing dot."
+  },
+  {
+    "id": "benign-15",
+    "url": "http://operator@192.0.2.20/verify-status",
+    "expected_label": "benign",
+    "rationale": "Constructed authorized lab diagnostic: a named operator checks device status; no unsolicited credential or payment demand."
+  },
+  {
+    "id": "benign-16",
+    "url": "http://technician@[2001:db8::20]/urgent-maintenance",
+    "expected_label": "benign",
+    "rationale": "Constructed scheduled lab maintenance link distributed by its known administrator, not an impersonation or extortion scenario."
+  },
+  {
+    "id": "suspicious-01",
+    "url": "https://account.example@192.0.2.30/verify",
+    "expected_label": "suspicious",
+    "rationale": "Synthetic scenario: an unsolicited account-closure message impersonates support and asks the recipient to enter a password at this link. Not verified fraud."
+  },
+  {
+    "id": "suspicious-02",
+    "url": "http://payroll.example@198.51.100.30/urgent",
+    "expected_label": "suspicious",
+    "rationale": "Synthetic scenario: a sender impersonating payroll demands an immediate transfer to release wages. Not verified fraud."
+  },
+  {
+    "id": "suspicious-03",
+    "url": "https://delivery.example@203.0.113.30/verify-payment",
+    "expected_label": "suspicious",
+    "rationale": "Synthetic scenario: an unexpected parcel message demands card details for a fabricated redelivery charge. Not verified fraud."
+  },
+  {
+    "id": "suspicious-04",
+    "url": "http://helpdesk.example@[2001:db8::30]/urgent-reset",
+    "expected_label": "suspicious",
+    "rationale": "Synthetic scenario: an unsolicited helpdesk impersonator requests a password and MFA recovery codes. Not verified fraud."
+  },
+  {
+    "id": "suspicious-05",
+    "url": "https://account-recovery.example/login",
+    "expected_label": "suspicious",
+    "rationale": "Synthetic scenario: a forged service notification asks for a password on a replacement login page. Not verified fraud; the URL alone cannot establish this context."
+  },
+  {
+    "id": "suspicious-06",
+    "url": "https://prize.example/claim",
+    "expected_label": "suspicious",
+    "rationale": "Synthetic scenario: an unsolicited prize offer requires an advance fee before any winnings. Not verified fraud."
+  },
+  {
+    "id": "suspicious-07",
+    "url": "https://refund.example/card-details",
+    "expected_label": "suspicious",
+    "rationale": "Synthetic scenario: a tax-office impersonator asks for full card details to issue an unexpected refund. Not verified fraud."
+  },
+  {
+    "id": "suspicious-08",
+    "url": "https://wallet.example/connect",
+    "expected_label": "suspicious",
+    "rationale": "Synthetic scenario: a purported wallet support agent asks the recipient to submit a seed phrase. Not verified fraud."
+  },
+  {
+    "id": "suspicious-09",
+    "url": "https://example.com/redirect?to=https%3A%2F%2Fcredential-drop.example%2Flogin",
+    "expected_label": "suspicious",
+    "rationale": "Synthetic scenario: an impersonation message conceals a credential-collection destination in a redirect parameter. No redirect behavior is claimed or tested; not verified fraud."
+  },
+  {
+    "id": "suspicious-10",
+    "url": "https://example.org/#submit-recovery-code",
+    "expected_label": "suspicious",
+    "rationale": "Synthetic scenario: a forged support message instructs the recipient to submit a recovery code via the linked workflow. No page behavior is verified; not verified fraud."
+  },
+  {
+    "id": "suspicious-11",
+    "url": "https://bank.example/verify-session",
+    "expected_label": "suspicious",
+    "rationale": "Synthetic scenario: an unsolicited bank impersonator threatens account suspension unless a password is submitted. Not verified fraud."
+  },
+  {
+    "id": "suspicious-12",
+    "url": "https://fees.example/urgent-payment",
+    "expected_label": "suspicious",
+    "rationale": "Synthetic scenario: a fake authority demands immediate payment under threat of arrest. Not verified fraud."
+  },
+  {
+    "id": "suspicious-13",
+    "url": "http://198.51.100.40/login",
+    "expected_label": "suspicious",
+    "rationale": "Synthetic scenario: a sender impersonates workplace IT and requests credentials on an unexpected replacement portal. Not verified fraud."
+  },
+  {
+    "id": "suspicious-14",
+    "url": "https://accounts.example@collector.example/session",
+    "expected_label": "suspicious",
+    "rationale": "Synthetic scenario: a forged account notice misrepresents the destination and asks for authentication codes. Not verified fraud."
+  },
+  {
+    "id": "suspicious-15",
+    "url": "http://203.0.113.40/verify",
+    "expected_label": "suspicious",
+    "rationale": "Synthetic scenario: a fake security agent asks for banking credentials to reverse a fabricated charge. Not verified fraud."
+  },
+  {
+    "id": "suspicious-16",
+    "url": "https://security.example@collector.example/urgent",
+    "expected_label": "suspicious",
+    "rationale": "Synthetic scenario: an impersonated security team pressures the recipient to provide MFA codes. Not verified fraud."
+  },
+  {
+    "id": "v2-benign-01",
+    "url": "https://example.org/university/information-1",
+    "expected_label": "benign",
+    "rationale": "Synthetic benign scenario: ordinary university information page with no malicious behavior stipulated. URL alone does not prove safety."
+  },
+  {
+    "id": "v2-benign-02",
+    "url": "https://example.org/internship/information-2",
+    "expected_label": "benign",
+    "rationale": "Synthetic benign scenario: ordinary internship information page with no malicious behavior stipulated. URL alone does not prove safety."
+  },
+  {
+    "id": "v2-benign-03",
+    "url": "https://example.org/scholarship/information-3",
+    "expected_label": "benign",
+    "rationale": "Synthetic benign scenario: ordinary scholarship information page with no malicious behavior stipulated. URL alone does not prove safety."
+  },
+  {
+    "id": "v2-benign-04",
+    "url": "https://example.org/accommodation/information-4",
+    "expected_label": "benign",
+    "rationale": "Synthetic benign scenario: ordinary accommodation information page with no malicious behavior stipulated. URL alone does not prove safety."
+  },
+  {
+    "id": "v2-benign-05",
+    "url": "https://example.org/student-support/information-5",
+    "expected_label": "benign",
+    "rationale": "Synthetic benign scenario: ordinary student-support information page with no malicious behavior stipulated. URL alone does not prove safety."
+  },
+  {
+    "id": "v2-benign-06",
+    "url": "https://example.org/recruitment/information-6",
+    "expected_label": "benign",
+    "rationale": "Synthetic benign scenario: ordinary recruitment information page with no malicious behavior stipulated. URL alone does not prove safety."
+  },
+  {
+    "id": "v2-benign-07",
+    "url": "https://example.org/tuition/information-7",
+    "expected_label": "benign",
+    "rationale": "Synthetic benign scenario: ordinary tuition information page with no malicious behavior stipulated. URL alone does not prove safety."
+  },
+  {
+    "id": "v2-benign-08",
+    "url": "https://example.org/campus/information-8",
+    "expected_label": "benign",
+    "rationale": "Synthetic benign scenario: ordinary campus information page with no malicious behavior stipulated. URL alone does not prove safety."
+  },
+  {
+    "id": "v2-benign-09",
+    "url": "https://example.org/housing/information-9",
+    "expected_label": "benign",
+    "rationale": "Synthetic benign scenario: ordinary housing information page with no malicious behavior stipulated. URL alone does not prove safety."
+  },
+  {
+    "id": "v2-benign-10",
+    "url": "https://example.org/application/information-10",
+    "expected_label": "benign",
+    "rationale": "Synthetic benign scenario: ordinary application information page with no malicious behavior stipulated. URL alone does not prove safety."
+  },
+  {
+    "id": "v2-benign-11",
+    "url": "https://example.org/library/information-11",
+    "expected_label": "benign",
+    "rationale": "Synthetic benign scenario: ordinary library information page with no malicious behavior stipulated. URL alone does not prove safety."
+  },
+  {
+    "id": "v2-benign-12",
+    "url": "https://example.org/research/information-12",
+    "expected_label": "benign",
+    "rationale": "Synthetic benign scenario: ordinary research information page with no malicious behavior stipulated. URL alone does not prove safety."
+  },
+  {
+    "id": "v2-benign-13",
+    "url": "https://example.org/transport/information-13",
+    "expected_label": "benign",
+    "rationale": "Synthetic benign scenario: ordinary transport information page with no malicious behavior stipulated. URL alone does not prove safety."
+  },
+  {
+    "id": "v2-benign-14",
+    "url": "https://example.org/documents/information-14",
+    "expected_label": "benign",
+    "rationale": "Synthetic benign scenario: ordinary documents information page with no malicious behavior stipulated. URL alone does not prove safety."
+  },
+  {
+    "id": "v2-benign-15",
+    "url": "https://example.org/admissions/information-15",
+    "expected_label": "benign",
+    "rationale": "Synthetic benign scenario: ordinary admissions information page with no malicious behavior stipulated. URL alone does not prove safety."
+  },
+  {
+    "id": "v2-benign-16",
+    "url": "https://example.org/career/information-16",
+    "expected_label": "benign",
+    "rationale": "Synthetic benign scenario: ordinary career information page with no malicious behavior stipulated. URL alone does not prove safety."
+  },
+  {
+    "id": "v2-benign-17",
+    "url": "https://example.org/training/information-17",
+    "expected_label": "benign",
+    "rationale": "Synthetic benign scenario: ordinary training information page with no malicious behavior stipulated. URL alone does not prove safety."
+  },
+  {
+    "id": "v2-benign-18",
+    "url": "https://example.org/university/information-18",
+    "expected_label": "benign",
+    "rationale": "Synthetic benign scenario: ordinary university information page with no malicious behavior stipulated. URL alone does not prove safety."
+  },
+  {
+    "id": "v2-benign-19",
+    "url": "https://example.org/internship/information-19",
+    "expected_label": "benign",
+    "rationale": "Synthetic benign scenario: ordinary internship information page with no malicious behavior stipulated. URL alone does not prove safety."
+  },
+  {
+    "id": "v2-benign-20",
+    "url": "https://example.org/scholarship/information-20",
+    "expected_label": "benign",
+    "rationale": "Synthetic benign scenario: ordinary scholarship information page with no malicious behavior stipulated. URL alone does not prove safety."
+  },
+  {
+    "id": "v2-benign-21",
+    "url": "https://example.org/accommodation/information-21",
+    "expected_label": "benign",
+    "rationale": "Synthetic benign scenario: ordinary accommodation information page with no malicious behavior stipulated. URL alone does not prove safety."
+  },
+  {
+    "id": "v2-benign-22",
+    "url": "https://example.org/student-support/information-22",
+    "expected_label": "benign",
+    "rationale": "Synthetic benign scenario: ordinary student-support information page with no malicious behavior stipulated. URL alone does not prove safety."
+  },
+  {
+    "id": "v2-benign-23",
+    "url": "https://example.org/recruitment/information-23",
+    "expected_label": "benign",
+    "rationale": "Synthetic benign scenario: ordinary recruitment information page with no malicious behavior stipulated. URL alone does not prove safety."
+  },
+  {
+    "id": "v2-benign-24",
+    "url": "https://example.org/tuition/information-24",
+    "expected_label": "benign",
+    "rationale": "Synthetic benign scenario: ordinary tuition information page with no malicious behavior stipulated. URL alone does not prove safety."
+  },
+  {
+    "id": "v2-benign-25",
+    "url": "https://example.org/campus/information-25",
+    "expected_label": "benign",
+    "rationale": "Synthetic benign scenario: ordinary campus information page with no malicious behavior stipulated. URL alone does not prove safety."
+  },
+  {
+    "id": "v2-benign-26",
+    "url": "https://example.org/housing/information-26",
+    "expected_label": "benign",
+    "rationale": "Synthetic benign scenario: ordinary housing information page with no malicious behavior stipulated. URL alone does not prove safety."
+  },
+  {
+    "id": "v2-benign-27",
+    "url": "https://example.org/application/information-27",
+    "expected_label": "benign",
+    "rationale": "Synthetic benign scenario: ordinary application information page with no malicious behavior stipulated. URL alone does not prove safety."
+  },
+  {
+    "id": "v2-benign-28",
+    "url": "https://example.org/library/information-28",
+    "expected_label": "benign",
+    "rationale": "Synthetic benign scenario: ordinary library information page with no malicious behavior stipulated. URL alone does not prove safety."
+  },
+  {
+    "id": "v2-benign-29",
+    "url": "https://example.org/research/information-29",
+    "expected_label": "benign",
+    "rationale": "Synthetic benign scenario: ordinary research information page with no malicious behavior stipulated. URL alone does not prove safety."
+  },
+  {
+    "id": "v2-benign-30",
+    "url": "https://example.org/transport/information-30",
+    "expected_label": "benign",
+    "rationale": "Synthetic benign scenario: ordinary transport information page with no malicious behavior stipulated. URL alone does not prove safety."
+  },
+  {
+    "id": "v2-benign-31",
+    "url": "https://example.org/documents/information-31",
+    "expected_label": "benign",
+    "rationale": "Synthetic benign scenario: ordinary documents information page with no malicious behavior stipulated. URL alone does not prove safety."
+  },
+  {
+    "id": "v2-benign-32",
+    "url": "https://example.org/admissions/information-32",
+    "expected_label": "benign",
+    "rationale": "Synthetic benign scenario: ordinary admissions information page with no malicious behavior stipulated. URL alone does not prove safety."
+  },
+  {
+    "id": "v2-benign-33",
+    "url": "https://example.org/career/information-33",
+    "expected_label": "benign",
+    "rationale": "Synthetic benign scenario: ordinary career information page with no malicious behavior stipulated. URL alone does not prove safety."
+  },
+  {
+    "id": "v2-benign-34",
+    "url": "https://example.org/training/information-34",
+    "expected_label": "benign",
+    "rationale": "Synthetic benign scenario: ordinary training information page with no malicious behavior stipulated. URL alone does not prove safety."
+  },
+  {
+    "id": "v2-suspicious-01",
+    "url": "https://university-portal.example@198.51.100.10/urgent-verify",
+    "expected_label": "suspicious",
+    "rationale": "Synthetic suspicious scenario: misleading university authority text before @, an IP-address destination, and an urgent verification path. These are URL-visible warning indicators, not verified fraud."
+  },
+  {
+    "id": "v2-suspicious-02",
+    "url": "https://internship-portal.example@198.51.100.11/urgent-verify",
+    "expected_label": "suspicious",
+    "rationale": "Synthetic suspicious scenario: misleading internship authority text before @, an IP-address destination, and an urgent verification path. These are URL-visible warning indicators, not verified fraud."
+  },
+  {
+    "id": "v2-suspicious-03",
+    "url": "https://scholarship-portal.example@198.51.100.12/urgent-verify",
+    "expected_label": "suspicious",
+    "rationale": "Synthetic suspicious scenario: misleading scholarship authority text before @, an IP-address destination, and an urgent verification path. These are URL-visible warning indicators, not verified fraud."
+  },
+  {
+    "id": "v2-suspicious-04",
+    "url": "https://accommodation-portal.example@198.51.100.13/urgent-verify",
+    "expected_label": "suspicious",
+    "rationale": "Synthetic suspicious scenario: misleading accommodation authority text before @, an IP-address destination, and an urgent verification path. These are URL-visible warning indicators, not verified fraud."
+  },
+  {
+    "id": "v2-suspicious-05",
+    "url": "https://student-support-portal.example@198.51.100.14/urgent-verify",
+    "expected_label": "suspicious",
+    "rationale": "Synthetic suspicious scenario: misleading student-support authority text before @, an IP-address destination, and an urgent verification path. These are URL-visible warning indicators, not verified fraud."
+  },
+  {
+    "id": "v2-suspicious-06",
+    "url": "https://recruitment-portal.example@198.51.100.15/urgent-verify",
+    "expected_label": "suspicious",
+    "rationale": "Synthetic suspicious scenario: misleading recruitment authority text before @, an IP-address destination, and an urgent verification path. These are URL-visible warning indicators, not verified fraud."
+  },
+  {
+    "id": "v2-suspicious-07",
+    "url": "https://tuition-portal.example@198.51.100.16/urgent-verify",
+    "expected_label": "suspicious",
+    "rationale": "Synthetic suspicious scenario: misleading tuition authority text before @, an IP-address destination, and an urgent verification path. These are URL-visible warning indicators, not verified fraud."
+  },
+  {
+    "id": "v2-suspicious-08",
+    "url": "https://campus-portal.example@198.51.100.17/urgent-verify",
+    "expected_label": "suspicious",
+    "rationale": "Synthetic suspicious scenario: misleading campus authority text before @, an IP-address destination, and an urgent verification path. These are URL-visible warning indicators, not verified fraud."
+  },
+  {
+    "id": "v2-suspicious-09",
+    "url": "https://housing-portal.example@198.51.100.18/urgent-verify",
+    "expected_label": "suspicious",
+    "rationale": "Synthetic suspicious scenario: misleading housing authority text before @, an IP-address destination, and an urgent verification path. These are URL-visible warning indicators, not verified fraud."
+  },
+  {
+    "id": "v2-suspicious-10",
+    "url": "https://application-portal.example@198.51.100.19/urgent-verify",
+    "expected_label": "suspicious",
+    "rationale": "Synthetic suspicious scenario: misleading application authority text before @, an IP-address destination, and an urgent verification path. These are URL-visible warning indicators, not verified fraud."
+  },
+  {
+    "id": "v2-suspicious-11",
+    "url": "https://library-portal.example@198.51.100.20/urgent-verify",
+    "expected_label": "suspicious",
+    "rationale": "Synthetic suspicious scenario: misleading library authority text before @, an IP-address destination, and an urgent verification path. These are URL-visible warning indicators, not verified fraud."
+  },
+  {
+    "id": "v2-suspicious-12",
+    "url": "https://research-portal.example@198.51.100.21/urgent-verify",
+    "expected_label": "suspicious",
+    "rationale": "Synthetic suspicious scenario: misleading research authority text before @, an IP-address destination, and an urgent verification path. These are URL-visible warning indicators, not verified fraud."
+  },
+  {
+    "id": "v2-suspicious-13",
+    "url": "https://transport-portal.example@198.51.100.22/urgent-verify",
+    "expected_label": "suspicious",
+    "rationale": "Synthetic suspicious scenario: misleading transport authority text before @, an IP-address destination, and an urgent verification path. These are URL-visible warning indicators, not verified fraud."
+  },
+  {
+    "id": "v2-suspicious-14",
+    "url": "https://documents-portal.example@198.51.100.23/urgent-verify",
+    "expected_label": "suspicious",
+    "rationale": "Synthetic suspicious scenario: misleading documents authority text before @, an IP-address destination, and an urgent verification path. These are URL-visible warning indicators, not verified fraud."
+  },
+  {
+    "id": "v2-suspicious-15",
+    "url": "https://admissions-portal.example@198.51.100.24/urgent-verify",
+    "expected_label": "suspicious",
+    "rationale": "Synthetic suspicious scenario: misleading admissions authority text before @, an IP-address destination, and an urgent verification path. These are URL-visible warning indicators, not verified fraud."
+  },
+  {
+    "id": "v2-suspicious-16",
+    "url": "https://career-portal.example@198.51.100.25/urgent-verify",
+    "expected_label": "suspicious",
+    "rationale": "Synthetic suspicious scenario: misleading career authority text before @, an IP-address destination, and an urgent verification path. These are URL-visible warning indicators, not verified fraud."
+  },
+  {
+    "id": "v2-suspicious-17",
+    "url": "https://training-portal.example@198.51.100.26/urgent-verify",
+    "expected_label": "suspicious",
+    "rationale": "Synthetic suspicious scenario: misleading training authority text before @, an IP-address destination, and an urgent verification path. These are URL-visible warning indicators, not verified fraud."
+  },
+  {
+    "id": "v2-suspicious-18",
+    "url": "https://university-portal.example@198.51.100.27/urgent-verify",
+    "expected_label": "suspicious",
+    "rationale": "Synthetic suspicious scenario: misleading university authority text before @, an IP-address destination, and an urgent verification path. These are URL-visible warning indicators, not verified fraud."
+  },
+  {
+    "id": "v2-suspicious-19",
+    "url": "https://internship-portal.example@198.51.100.28/urgent-verify",
+    "expected_label": "suspicious",
+    "rationale": "Synthetic suspicious scenario: misleading internship authority text before @, an IP-address destination, and an urgent verification path. These are URL-visible warning indicators, not verified fraud."
+  },
+  {
+    "id": "v2-suspicious-20",
+    "url": "https://scholarship-portal.example@198.51.100.29/urgent-verify",
+    "expected_label": "suspicious",
+    "rationale": "Synthetic suspicious scenario: misleading scholarship authority text before @, an IP-address destination, and an urgent verification path. These are URL-visible warning indicators, not verified fraud."
+  },
+  {
+    "id": "v2-suspicious-21",
+    "url": "https://accommodation-portal.example@198.51.100.30/urgent-verify",
+    "expected_label": "suspicious",
+    "rationale": "Synthetic suspicious scenario: misleading accommodation authority text before @, an IP-address destination, and an urgent verification path. These are URL-visible warning indicators, not verified fraud."
+  },
+  {
+    "id": "v2-suspicious-22",
+    "url": "https://student-support-portal.example@198.51.100.31/urgent-verify",
+    "expected_label": "suspicious",
+    "rationale": "Synthetic suspicious scenario: misleading student-support authority text before @, an IP-address destination, and an urgent verification path. These are URL-visible warning indicators, not verified fraud."
+  },
+  {
+    "id": "v2-suspicious-23",
+    "url": "https://recruitment-portal.example@198.51.100.32/urgent-verify",
+    "expected_label": "suspicious",
+    "rationale": "Synthetic suspicious scenario: misleading recruitment authority text before @, an IP-address destination, and an urgent verification path. These are URL-visible warning indicators, not verified fraud."
+  },
+  {
+    "id": "v2-suspicious-24",
+    "url": "https://tuition-portal.example@198.51.100.33/urgent-verify",
+    "expected_label": "suspicious",
+    "rationale": "Synthetic suspicious scenario: misleading tuition authority text before @, an IP-address destination, and an urgent verification path. These are URL-visible warning indicators, not verified fraud."
+  },
+  {
+    "id": "v2-suspicious-25",
+    "url": "https://campus-portal.example@198.51.100.34/urgent-verify",
+    "expected_label": "suspicious",
+    "rationale": "Synthetic suspicious scenario: misleading campus authority text before @, an IP-address destination, and an urgent verification path. These are URL-visible warning indicators, not verified fraud."
+  },
+  {
+    "id": "v2-suspicious-26",
+    "url": "https://housing-portal.example@198.51.100.35/urgent-verify",
+    "expected_label": "suspicious",
+    "rationale": "Synthetic suspicious scenario: misleading housing authority text before @, an IP-address destination, and an urgent verification path. These are URL-visible warning indicators, not verified fraud."
+  },
+  {
+    "id": "v2-suspicious-27",
+    "url": "https://application-portal.example@198.51.100.36/urgent-verify",
+    "expected_label": "suspicious",
+    "rationale": "Synthetic suspicious scenario: misleading application authority text before @, an IP-address destination, and an urgent verification path. These are URL-visible warning indicators, not verified fraud."
+  },
+  {
+    "id": "v2-suspicious-28",
+    "url": "https://library-portal.example@198.51.100.37/urgent-verify",
+    "expected_label": "suspicious",
+    "rationale": "Synthetic suspicious scenario: misleading library authority text before @, an IP-address destination, and an urgent verification path. These are URL-visible warning indicators, not verified fraud."
+  },
+  {
+    "id": "v2-suspicious-29",
+    "url": "https://research-portal.example@198.51.100.38/urgent-verify",
+    "expected_label": "suspicious",
+    "rationale": "Synthetic suspicious scenario: misleading research authority text before @, an IP-address destination, and an urgent verification path. These are URL-visible warning indicators, not verified fraud."
+  },
+  {
+    "id": "v2-suspicious-30",
+    "url": "https://transport-portal.example@198.51.100.39/urgent-verify",
+    "expected_label": "suspicious",
+    "rationale": "Synthetic suspicious scenario: misleading transport authority text before @, an IP-address destination, and an urgent verification path. These are URL-visible warning indicators, not verified fraud."
+  },
+  {
+    "id": "v2-suspicious-31",
+    "url": "https://documents-portal.example@198.51.100.40/urgent-verify",
+    "expected_label": "suspicious",
+    "rationale": "Synthetic suspicious scenario: misleading documents authority text before @, an IP-address destination, and an urgent verification path. These are URL-visible warning indicators, not verified fraud."
+  },
+  {
+    "id": "v2-suspicious-32",
+    "url": "https://admissions-portal.example@198.51.100.41/urgent-verify",
+    "expected_label": "suspicious",
+    "rationale": "Synthetic suspicious scenario: misleading admissions authority text before @, an IP-address destination, and an urgent verification path. These are URL-visible warning indicators, not verified fraud."
+  },
+  {
+    "id": "v2-suspicious-33",
+    "url": "https://career-portal.example@198.51.100.42/urgent-verify",
+    "expected_label": "suspicious",
+    "rationale": "Synthetic suspicious scenario: misleading career authority text before @, an IP-address destination, and an urgent verification path. These are URL-visible warning indicators, not verified fraud."
+  },
+  {
+    "id": "v2-suspicious-34",
+    "url": "https://training-portal.example@198.51.100.43/urgent-verify",
+    "expected_label": "suspicious",
+    "rationale": "Synthetic suspicious scenario: misleading training authority text before @, an IP-address destination, and an urgent verification path. These are URL-visible warning indicators, not verified fraud."
+  }
+]

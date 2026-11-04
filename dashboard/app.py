@@ -12,7 +12,7 @@ import streamlit as st
 
 from dashboard.data import (
     DashboardClient, DataError, OLLAMA_MODEL, confusion_matrix,
-    history_rows, load_benchmark, qwen_available,
+    history_rows, load_benchmark, load_benchmark_version, threshold_sweep, qwen_available,
 )
 
 st.set_page_config(page_title="SUS.NOT | Safety Guardian", page_icon="🛡️", layout="wide")
@@ -178,60 +178,71 @@ def history(client):
 
 
 def benchmarks():
-    st.header("Benchmarks")
-    st.warning("Synthetic cases only. These results do not establish real-world fraud accuracy.")
-    try:
-        benchmark = load_benchmark()
-    except DataError as error:
-        st.error(str(error))
+    st.header("Benchmarks · Offline URL heuristic")
+    st.warning("Synthetic, constructed scenarios only. Not verified fraud, live detection, or real-world accuracy. The URL scorer is unchanged across V1–V3.")
+    st.caption("These are three datasets, not three model releases. V2 is deliberately easier and repetitive; V3 probes single-indicator and context-dependent blind spots.")
+
+    titles = {"V1": "Original baseline · 32 cases", "V2": "Repetitive-pattern stress test · 100 cases", "V3": "Challenge set · 100 cases"}
+    loaded = {}
+    for version in titles:
+        try:
+            loaded[version] = load_benchmark_version(version)
+        except DataError as error:
+            st.error(str(error))
+    if not loaded:
         return
-    left, right = st.columns(2)
-    left.metric("Dataset size", benchmark.dataset_size)
-    right.metric("Warning threshold (SUS Score ≥)", benchmark.warning_threshold)
-    metrics = benchmark.metrics
-    for columns, names in ((st.columns(4), ["true_positives", "true_negatives", "false_positives", "false_negatives"]),
-                           (st.columns(4), ["precision", "recall", "f1_score", "accuracy"])):
-        for column, name in zip(columns, names):
-            value = getattr(metrics, name)
-            column.metric(name.replace("_", " ").title(), f"{value:.2%}" if isinstance(value, float) else value)
+
+    st.subheader("Side-by-side comparison")
+    summary = []
+    for version, (report, rows) in loaded.items():
+        m = report.metrics
+        summary.append({"Version": version, "Purpose": titles[version], "Cases": report.dataset_size,
+                        "Accuracy": f"{m.accuracy:.2%}", "Precision": f"{m.precision:.2%}",
+                        "Recall": f"{m.recall:.2%}", "F1": f"{m.f1_score:.2%}",
+                        "TP": m.true_positives, "TN": m.true_negatives,
+                        "FP": m.false_positives, "FN": m.false_negatives})
+    st.dataframe(summary, hide_index=True, width="stretch")
+    st.info("V2's 86% accuracy reflects its constructed pattern distribution, not a detector improvement. V3 includes suspicious scenarios requiring message context absent from URL-only scoring. Results are not directly comparable as performance progression.")
+
+    version = st.selectbox("Inspect benchmark", list(loaded), format_func=lambda key: f"{key} — {titles[key]}")
+    report, rows = loaded[version]
+    st.subheader(f"{version} · Saved evaluation")
+    st.caption("Read-only saved artifact · no network requests, model calls, or live evaluation")
+    c1, c2, c3, c4 = st.columns(4)
+    for column, label, value in zip((c1, c2, c3, c4),
+                                    ("Cases", "Warning threshold", "False positives", "False negatives"),
+                                    (report.dataset_size, report.warning_threshold,
+                                     report.metrics.false_positives, report.metrics.false_negatives)):
+        column.metric(label, value)
     st.subheader("Confusion matrix")
-    st.table(confusion_matrix(benchmark))
-    st.caption("Positive class: suspicious. Rows = actual; columns = predicted. Saved artifact, not a live evaluation.")
-    st.text(f"Evaluation version: {benchmark.evaluation_version}\nDataset SHA-256: {benchmark.dataset_sha256}")
-    st.code(".venv/bin/python -m benchmarks.evaluate_urls", language="bash")
+    st.table(confusion_matrix(report))
+    st.caption("Positive class = suspicious. Rows are actual labels; columns are predictions. Review-band scores below 60 count as benign in this binary benchmark, not as permission to proceed.")
+    st.subheader("Case-level evidence")
+    outcome = st.selectbox("Filter cases", ["All", "FP", "FN", "TP", "TN"], key=f"outcome_{version}")
+    filtered = [row for row in rows if outcome == "All" or row["outcome"].upper() == outcome]
+    st.dataframe([{"ID": row["id"], "Actual": row["expected_label"],
+                   "Predicted": row["predicted_label"], "Outcome": row["outcome"].upper(),
+                   "Score": row["sus_score"], "URL": row["url"], "Rationale": row["rationale"],
+                   "Indicators": "; ".join(row["indicators"])} for row in filtered],
+                 hide_index=True, width="stretch")
+    st.caption(f"Showing {len(filtered)} of {len(rows)} cases. Rationales describe constructed scenarios, not verified website behavior.")
+
+    if version == "V3":
+        st.subheader("Exploratory threshold analysis · V3")
+        sweep = threshold_sweep(rows)
+        st.dataframe([{**row, **{name: f"{row[name]:.2%}" for name in ("Accuracy", "Precision", "Recall", "F1")}} for row in sweep],
+                     hide_index=True, width="stretch")
+        st.caption("Thresholds are applied to the same saved V3 scores. This is exploratory tuning on V3, not an independent validation or a change to the deployed policy. Lower thresholds increase false alarms.")
+
+    st.subheader("Reproduce and audit")
+    st.code(f".venv/bin/python -m benchmarks.evaluate_urls --version {version[1:]}", language="bash")
+    st.code(f"Dataset: benchmarks/url_cases_v{version[1:]}.json\nResult: benchmarks/results/url_evaluation_v{version[1:]}.json\nDataset SHA-256 (canonical validated JSON): {report.dataset_sha256}", language="text")
+    st.caption("V1 remains compatible with the original default command: .venv/bin/python -m benchmarks.evaluate_urls. Documentation: docs/url-evaluation.md")
 
 
 def evidence():
-    st.header("Project Evidence")
-    st.caption("Repository artifacts, not live integration or test claims")
-    references = [
-        ("MCP server", "docs/mcp-server.md"),
-        ("Decision Policy v1", "docs/decision-policy.md"),
-        ("Evaluation methodology", "docs/url-evaluation.md"),
-        ("Local text investigator", "docs/text-investigator.md"),
-        ("History privacy and schema", "docs/investigation-history.md"),
-        ("Dashboard architecture and verification", "docs/dashboard.md"),
-    ]
-    if (ROOT / "backend/mcp_server.py").is_file():
-        st.info("MCP implementation present: backend/mcp_server.py (stdio). Runtime status is not checked here.")
-    else:
-        st.warning("MCP implementation not found in this checkout.")
-    for title, relative in references:
-        path = ROOT / relative
-        if path.is_file():
-            with st.expander(f"{title} · {relative}"):
-                st.code(path.read_text(encoding="utf-8"), language="markdown")
-        else:
-            st.caption(f"{title}: {relative} not available")
-    evidence_path = ROOT / "EVIDENCE.md"
-    if evidence_path.is_file() and evidence_path.stat().st_size:
-        with st.expander("Existing evidence · EVIDENCE.md"):
-            st.code(evidence_path.read_text(encoding="utf-8"), language="markdown")
-    else:
-        st.caption("EVIDENCE.md has no recorded evidence. Historical verification is documented in the task-specific docs; counts describe those runs only.")
-    st.subheader("Reproduce locally")
-    st.code(".venv/bin/python -m pytest -q\nnode --test tests/*.test.cjs\n.venv/bin/python -m benchmarks.evaluate_urls\n.venv/bin/python -m backend.mcp_server", language="bash")
-    st.caption("Commands are references only. The dashboard does not execute tests or launch MCP.")
+    from dashboard.evidence_page import evidence_page
+    evidence_page()
 
 
 def main():

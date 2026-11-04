@@ -1,4 +1,5 @@
 import os
+from time import perf_counter
 from contextlib import asynccontextmanager
 from ipaddress import ip_address
 from typing import Literal
@@ -8,6 +9,7 @@ from fastapi import FastAPI, Header
 from pydantic import BaseModel, Field, HttpUrl, field_validator
 
 from backend.decision_policy import URLDecision, evaluate_url_result
+from backend.runtime_log import log_event
 from backend.text_investigator import router as text_investigator_router
 from backend.history import record_history, redact_url, router as history_router
 from backend.orchestration import router as orchestration_router
@@ -116,6 +118,7 @@ def investigate_url(
     request: AnalyzeURLRequest,
     x_susnot_record_history: str | None = Header(default=None),
 ) -> AnalyzeURLResponse:
+    started = perf_counter()
     result = analyze_url(request)
     # Explicitly enabled, loopback-only synthetic fixture for end-to-end Chrome UI testing.
     # Never enabled by default and never represents a real phishing verdict.
@@ -131,6 +134,12 @@ def investigate_url(
         redacted_url=redact_url(request.url), sus_score=result.sus_score,
         risk_level=result.risk_level, indicators=result.indicators,
     )
+    log_event(
+        'url_analysis_completed',
+        score=result.sus_score,
+        risk_level=result.risk_level,
+        duration_ms=(perf_counter() - started) * 1000,
+    )
     return result
 
 
@@ -139,6 +148,7 @@ def evaluate_url(
     request: AnalyzeURLRequest,
     x_susnot_record_history: str | None = Header(default=None),
 ) -> URLDecision:
+    started = perf_counter()
     result = analyze_url(request)
     decision = evaluate_url_result(result)
     record_history(
@@ -146,6 +156,12 @@ def evaluate_url(
         redacted_url=redact_url(request.url), sus_score=decision.sus_score,
         risk_level=decision.risk_level, indicators=result.indicators,
         recommended_action=decision.recommended_action, policy_version=decision.policy_version,
+    )
+    log_event(
+        'url_evaluation_completed',
+        score=decision.sus_score,
+        risk_level=decision.risk_level,
+        duration_ms=(perf_counter() - started) * 1000,
     )
     return decision
 

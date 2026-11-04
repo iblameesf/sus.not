@@ -1,0 +1,8 @@
+{
+  "block": 1,
+  "evidence_type": "Local Qwen model tool-call evidence",
+  "source_file": "qwen-tool-call.json",
+  "source_valid_json": true,
+  "verification": "Source file exists and parses successfully",
+  "note": "This summary references existing evidence; it does not independently establish test success."
+}

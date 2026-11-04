@@ -1,6 +1,8 @@
 """Validated, localhost-only dashboard data access. No Streamlit or persistence."""
 
 from datetime import datetime, timedelta
+import hashlib
+import json
 from pathlib import Path
 from typing import Literal
 from uuid import UUID
@@ -107,6 +109,69 @@ def load_benchmark(path: Path = BENCHMARK_PATH) -> Benchmark:
     except (OSError, ValueError):
         raise DataError("Saved benchmark is missing or invalid. Re-run the offline evaluation.") from None
 
+
+
+BENCHMARK_VERSIONS = {
+    "V1": ("url_cases_v1.json", "url_evaluation_v1.json"),
+    "V2": ("url_cases_v2.json", "url_evaluation_v2.json"),
+    "V3": ("url_cases_v3.json", "url_evaluation_v3.json"),
+}
+
+def load_benchmark_version(version: str) -> tuple[Benchmark, list[dict]]:
+    """Load saved offline evidence, verifying dataset identity and case counts."""
+    if version not in BENCHMARK_VERSIONS:
+        raise DataError("Unknown benchmark version.")
+    dataset_name, result_name = BENCHMARK_VERSIONS[version]
+    base = ROOT / "benchmarks"
+    try:
+        dataset = json.loads((base / dataset_name).read_text(encoding="utf-8"))
+        raw = json.loads((base / "results" / result_name).read_text(encoding="utf-8"))
+        benchmark = Benchmark.model_validate(raw)
+        canonical = json.dumps(dataset, sort_keys=True, ensure_ascii=True)
+        digest = hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+        rows = raw["cases"]
+        if (not isinstance(dataset, list) or not isinstance(rows, list)
+                or len(dataset) != benchmark.dataset_size or len(rows) != len(dataset)
+                or digest != benchmark.dataset_sha256
+                or benchmark.evaluation_version != version[1:]):
+            raise ValueError("Inconsistent saved benchmark")
+        if len({case["id"] for case in dataset}) != len(dataset):
+            raise ValueError("Duplicate case IDs")
+        expected = {"tp": 0, "tn": 0, "fp": 0, "fn": 0}
+        for case, row in zip(dataset, rows):
+            if any(row.get(key) != case[key] for key in ("id", "url", "expected_label", "rationale")):
+                raise ValueError("Dataset and result rows disagree")
+            predicted = "suspicious" if row["sus_score"] >= benchmark.warning_threshold else "benign"
+            outcome = ("tp" if case["expected_label"] == "suspicious" else "fp") if predicted == "suspicious" else ("fn" if case["expected_label"] == "suspicious" else "tn")
+            if row.get("predicted_label") != predicted or row.get("outcome") != outcome:
+                raise ValueError("Invalid case outcome")
+            expected[outcome] += 1
+        m = benchmark.metrics
+        if (expected["tp"], expected["tn"], expected["fp"], expected["fn"]) != (m.true_positives, m.true_negatives, m.false_positives, m.false_negatives):
+            raise ValueError("Invalid confusion matrix")
+        return benchmark, rows
+    except (OSError, ValueError, KeyError, TypeError):
+        raise DataError(f"{version} saved evidence is missing or inconsistent. Re-run its offline evaluation.") from None
+
+def threshold_sweep(rows: list[dict], thresholds=(15, 25, 30, 40, 45, 55, 60, 70)) -> list[dict]:
+    """Exploratory reclassification of stored scores; no new inference."""
+    result = []
+    for threshold in thresholds:
+        tp = tn = fp = fn = 0
+        for row in rows:
+            predicted = row["sus_score"] >= threshold
+            positive = row["expected_label"] == "suspicious"
+            if predicted and positive: tp += 1
+            elif predicted: fp += 1
+            elif positive: fn += 1
+            else: tn += 1
+        precision = tp / (tp + fp) if tp + fp else 0.0
+        recall = tp / (tp + fn) if tp + fn else 0.0
+        result.append({"Threshold": threshold, "Accuracy": (tp + tn) / len(rows) if rows else 0.0,
+                       "Precision": precision, "Recall": recall,
+                       "F1": 2 * tp / (2 * tp + fp + fn) if 2 * tp + fp + fn else 0.0,
+                       "FP": fp, "FN": fn})
+    return result
 
 def confusion_matrix(benchmark: Benchmark) -> list[dict]:
     m = benchmark.metrics

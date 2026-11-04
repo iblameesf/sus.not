@@ -1,5 +1,6 @@
 """Offline synthetic URL benchmark. Run: python -m benchmarks.evaluate_urls."""
 
+import argparse
 import hashlib
 import json
 from pathlib import Path
@@ -64,7 +65,7 @@ def calculate_metrics(*, tp: int, tn: int, fp: int, fn: int) -> dict:
     }
 
 
-def evaluate_cases(cases: list[URLCase]) -> dict:
+def evaluate_cases(cases: list[URLCase], *, evaluation_version: str = "1") -> dict:
     counts = {"tp": 0, "tn": 0, "fp": 0, "fn": 0}
     rows = []
     for case in cases:
@@ -84,7 +85,7 @@ def evaluate_cases(cases: list[URLCase]) -> dict:
     # Hash normalized validated data, not formatting, for stable dataset identity.
     canonical = json.dumps([case.model_dump() for case in cases], sort_keys=True, ensure_ascii=True)
     return {
-        "evaluation_version": "1",
+        "evaluation_version": evaluation_version,
         "dataset_sha256": hashlib.sha256(canonical.encode("utf-8")).hexdigest(),
         "warning_threshold": WARNING_THRESHOLD,
         "dataset_size": len(cases),
@@ -116,13 +117,23 @@ def print_report(report: dict) -> None:
     print(report["label_caveat"])
 
 
-def main() -> None:
-    report = evaluate_cases(load_cases())
-    RESULTS_PATH.parent.mkdir(parents=True, exist_ok=True)
-    RESULTS_PATH.write_text(serialize_report(report), encoding="utf-8")
+def main(argv: list[str] | None = None) -> None:
+    parser = argparse.ArgumentParser(description="Reproduce saved synthetic URL evaluations")
+    parser.add_argument("--version", choices=("1", "2", "3"), default="1",
+                        help="Dataset version; default 1 retains original command behavior")
+    args = parser.parse_args([] if argv is None else argv)
+    dataset = DATASET_PATH if args.version == "1" else DATASET_PATH.with_name(f"url_cases_v{args.version}.json")
+    output = RESULTS_PATH if args.version == "1" else RESULTS_PATH.with_name(f"url_evaluation_v{args.version}.json")
+    report = evaluate_cases(load_cases(dataset), evaluation_version=args.version)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(serialize_report(report), encoding="utf-8")
+    # Explicit V1 artifact is retained alongside the legacy default path.
+    if args.version == "1":
+        RESULTS_PATH.with_name("url_evaluation_v1.json").write_text(serialize_report(report), encoding="utf-8")
     print_report(report)
-    print(f"Saved: {RESULTS_PATH}")
+    print(f"Saved: {output}")
 
 
 if __name__ == "__main__":
-    main()
+    import sys
+    main(sys.argv[1:])

@@ -160,3 +160,8 @@ visual responsiveness audit. The dashboard never runs tests itself.
 Task 10 verification: **219 Python tests and 14 Node tests passed**, including
 43 dashboard tests. No live Ollama inference or manual browser layout audit was
 performed for this task.
+
+
+## Versioned benchmark dashboard (V1–V3)
+
+The Benchmarks page reads offline saved artifacts only (no live model calls), validates dataset identity against canonical SHA-256 and checks row-level predictions/outcomes. It compares three different synthetic datasets without presenting their accuracy as successive model improvements. Each dataset has a confusion matrix, full case table with FP/FN filtering, and reproducibility command. V3 includes an exploratory threshold sweep calculated from stored scores, without changing the deployed warning threshold. See `docs/url-evaluation.md`.

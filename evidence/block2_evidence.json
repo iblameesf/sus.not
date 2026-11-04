@@ -1,0 +1,8 @@
+{
+  "block": 2,
+  "evidence_type": "Live MCP protocol execution evidence",
+  "source_file": "mcp-live-trace.json",
+  "source_valid_json": true,
+  "verification": "Source file exists and parses successfully",
+  "note": "This summary references existing evidence; it does not independently establish test success."
+}

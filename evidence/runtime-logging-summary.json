@@ -1,0 +1,25 @@
+{
+  "generated_at_utc": "2026-11-03T17:12:37.396869+00:00",
+  "evidence_type": "controlled_runtime_logging_validation",
+  "dataset": "synthetic_test_urls",
+  "event_count": 4,
+  "events": {
+    "url_analysis_completed": 2,
+    "url_evaluation_completed": 2
+  },
+  "risk_levels": {
+    "low": 3,
+    "review": 1
+  },
+  "duration_ms": {
+    "minimum": 0.02,
+    "maximum": 0.06,
+    "average": 0.04
+  },
+  "privacy": {
+    "full_urls_logged": false,
+    "hostnames_logged": false,
+    "email_content_logged": false
+  },
+  "verification": "four real FastAPI TestClient requests"
+}
